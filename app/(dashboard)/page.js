@@ -31,9 +31,8 @@ export default function Dashboard() {
     checkUser()
   }, [])
 
-  const origin = mounted ? window.location.origin : ''
-  const host = mounted ? window.location.host : ''
-  const protocol = mounted ? window.location.protocol : ''
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || (mounted ? window.location.origin : '')
+  const displayUrl = baseUrl.replace(/^https?:\/\//, '') // URL for display without protocol
 
   const fetchLinks = async (uid) => {
     const { data, error } = await supabase
@@ -117,8 +116,8 @@ export default function Dashboard() {
               <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
               <span className="whitespace-nowrap font-medium">Your Public Bio Link:</span>
             </div>
-            <a href={`/bio/${userId}`} target="_blank" className="font-mono text-primary hover:underline break-all bg-muted/50 px-2 py-1 rounded">
-              {protocol}//{host}/bio/{userId}
+            <a href={`${baseUrl}/bio/${userId}`} target="_blank" className="font-mono text-primary hover:underline break-all bg-muted/50 px-2 py-1 rounded">
+              {displayUrl}/bio/{userId}
             </a>
           </div>
         )}
@@ -260,7 +259,7 @@ export default function Dashboard() {
                   <div className="p-2 bg-white rounded-lg border border-gray-100 shadow-sm">
                     <QRCodeCanvas
                       id={`qr-${link.slug}`}
-                      value={`${protocol}//${host}/${link.slug}`}
+                      value={`${baseUrl}/${link.slug}`}
                       size={40}
                       level={"H"}
                     />
@@ -280,7 +279,7 @@ export default function Dashboard() {
                     <Download size={18} />
                   </button>
                   <button
-                    onClick={() => navigator.clipboard.writeText(`${protocol}//${host}/${link.slug}`)}
+                    onClick={() => navigator.clipboard.writeText(`${baseUrl}/${link.slug}`)}
                     className="p-3 bg-muted hover:bg-accent text-foreground rounded-xl transition-colors"
                     title="Copy Link"
                   >

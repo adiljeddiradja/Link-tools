@@ -264,7 +264,11 @@ export default function ProfileEditor({ params }) {
 
                 <div className="mt-8 text-center space-y-2">
                     <p className="text-slate-500 text-sm">Live Preview</p>
-                    <a href={`/bio/${profile.handle}`} target="_blank" className="inline-flex items-center gap-2 text-blue-400 hover:text-blue-300 text-sm font-medium transition-colors">
+                    <a
+                        href={`${process.env.NEXT_PUBLIC_BASE_URL || ''}/bio/${profile.handle}`}
+                        target="_blank"
+                        className="inline-flex items-center gap-2 text-blue-400 hover:text-blue-300 text-sm font-medium transition-colors"
+                    >
                         View Live Page <ExternalLink size={14} />
                     </a>
                 </div>
