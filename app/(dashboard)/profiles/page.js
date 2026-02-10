@@ -80,7 +80,7 @@ export default function ProfilesPage() {
     }
 
     const handleDelete = async (id) => {
-        if (!confirm('Are you sure? This will hide links associated with this profile.')) return
+        if (!confirm('Hapus halaman ini secara permanen?')) return
 
         const { error } = await supabase.from('profiles').delete().eq('id', id)
         if (!error) {
