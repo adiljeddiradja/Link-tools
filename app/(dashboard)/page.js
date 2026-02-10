@@ -84,6 +84,19 @@ export default function Dashboard() {
     setLoading(false)
   }
 
+  const handleToggleActive = async (id, currentStatus) => {
+    const { error } = await supabase
+      .from('links')
+      .update({ is_active: !currentStatus })
+      .eq('id', id)
+
+    if (!error) {
+      setLinks(links.map(link => link.id === id ? { ...link, is_active: !currentStatus } : link))
+    } else {
+      alert('Error updating link status: ' + error.message)
+    }
+  }
+
   const handleDelete = async (id) => {
     const { error } = await supabase.from('links').delete().eq('id', id)
     if (!error) {
@@ -267,7 +280,7 @@ export default function Dashboard() {
             </div>
           ) : (
             links.map((link) => (
-              <div key={link.id} className="bg-card border border-border p-5 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 group hover:shadow-md transition-all">
+              <div key={link.id} className={`bg-card border border-border p-5 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 group hover:shadow-md transition-all ${link.is_active === false ? 'opacity-50' : 'opacity-100'}`}>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-3 mb-1">
                     <h4 className="font-bold text-lg text-primary truncate tracking-tight">{link.slug}</h4>
@@ -282,6 +295,17 @@ export default function Dashboard() {
                 </div>
 
                 <div className="flex items-center gap-3 self-end sm:self-center">
+                  <button
+                    onClick={() => handleToggleActive(link.id, link.is_active)}
+                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none ${link.is_active !== false ? 'bg-green-500' : 'bg-slate-600'
+                      }`}
+                    title={link.is_active !== false ? 'Link is Active' : 'Link is Paused'}
+                  >
+                    <span
+                      className={`${link.is_active !== false ? 'translate-x-6' : 'translate-x-1'
+                        } inline-block h-4 w-4 transform rounded-full bg-white transition-transform`}
+                    />
+                  </button>
                   <div className="p-2 bg-white rounded-lg border border-gray-100 shadow-sm">
                     <QRCodeCanvas
                       id={`qr-${link.slug}`}

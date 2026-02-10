@@ -17,16 +17,28 @@ export default async function BioPage({ params }) {
         .single()
 
     if (profileError || !profile) {
-        // Fallback for old "user_id" based URLs (Backwards Compatibility)
-        // If we can't find a profile with this handle, maybe it's a legacy user_id URL?
-        // For this task, let's just show "Profile not found" to encourage using the new system.
-        // Or we could try to find a profile where user_id = username?
-
         return (
             <div className="min-h-screen flex items-center justify-center bg-[#0f172a] text-slate-400">
                 <div className="text-center">
                     <h1 className="text-2xl font-bold text-white mb-2">Profile Not Found</h1>
                     <p>The page @{username} does not exist.</p>
+                </div>
+            </div>
+        )
+    }
+
+    if (profile.is_active === false) {
+        return (
+            <div className="min-h-screen flex items-center justify-center bg-[#0f172a] text-slate-400">
+                <div className="text-center px-6">
+                    <div className="w-20 h-20 bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-6 text-slate-500">
+                        <Layout size={40} />
+                    </div>
+                    <h1 className="text-2xl font-bold text-white mb-2">Halaman Nonaktif</h1>
+                    <p className="max-w-md mx-auto">Maaf, halaman ini sedang dinonaktifkan sementara oleh pemiliknya. Silakan cek kembali nanti.</p>
+                    <div className="mt-8 pt-8 border-t border-slate-800">
+                        <p className="text-sm italic">Credit by A Deel</p>
+                    </div>
                 </div>
             </div>
         )

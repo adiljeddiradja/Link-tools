@@ -66,6 +66,19 @@ export default function ProfilesPage() {
         }
     }
 
+    const handleToggleActive = async (id, currentStatus) => {
+        const { error } = await supabase
+            .from('profiles')
+            .update({ is_active: !currentStatus })
+            .eq('id', id)
+
+        if (!error) {
+            setProfiles(profiles.map(p => p.id === id ? { ...p, is_active: !currentStatus } : p))
+        } else {
+            alert('Error updating status: ' + error.message)
+        }
+    }
+
     const handleDelete = async (id) => {
         if (!confirm('Are you sure? This will hide links associated with this profile.')) return
 
@@ -159,7 +172,7 @@ export default function ProfilesPage() {
                         <div key={profile.id} className="bg-card border border-border p-6 rounded-2xl shadow-sm hover:shadow-md transition-all group">
                             <div className="flex justify-between items-start mb-4">
                                 <div className="flex items-center gap-4">
-                                    <div className={`w-12 h-12 rounded-full flex items-center justify-center text-lg font-bold text-white shadow-lg ${profile.theme_color === 'purple' ? 'bg-purple-600' :
+                                    <div className={`w-12 h-12 rounded-full flex items-center justify-center text-lg font-bold text-white shadow-lg transition-opacity ${profile.is_active === false ? 'opacity-40' : 'opacity-100'} ${profile.theme_color === 'purple' ? 'bg-purple-600' :
                                         profile.theme_color === 'pink' ? 'bg-pink-600' :
                                             profile.theme_color === 'light' ? 'bg-slate-400' : 'bg-blue-600'
                                         }`}>
@@ -173,12 +186,25 @@ export default function ProfilesPage() {
                                     </div>
                                 </div>
 
-                                <button
-                                    onClick={() => handleDelete(profile.id)}
-                                    className="text-muted-foreground hover:text-red-500 p-2 hover:bg-red-500/10 rounded-lg transition-colors"
-                                >
-                                    <Trash2 size={16} />
-                                </button>
+                                <div className="flex items-center gap-2">
+                                    <button
+                                        onClick={() => handleToggleActive(profile.id, profile.is_active)}
+                                        className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none ${profile.is_active !== false ? 'bg-green-500' : 'bg-slate-600'
+                                            }`}
+                                        title={profile.is_active !== false ? 'Page is Live' : 'Page is Offline'}
+                                    >
+                                        <span
+                                            className={`${profile.is_active !== false ? 'translate-x-6' : 'translate-x-1'
+                                                } inline-block h-4 w-4 transform rounded-full bg-white transition-transform`}
+                                        />
+                                    </button>
+                                    <button
+                                        onClick={() => handleDelete(profile.id)}
+                                        className="text-muted-foreground hover:text-red-500 p-2 hover:bg-red-500/10 rounded-lg transition-colors"
+                                    >
+                                        <Trash2 size={16} />
+                                    </button>
+                                </div>
                             </div>
 
                             <div className="flex gap-3 mt-4">
