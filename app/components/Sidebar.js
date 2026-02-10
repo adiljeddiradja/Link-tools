@@ -32,27 +32,33 @@ export default function Sidebar() {
         <>
             {/* Mobile Hamburger Button */}
             <button
-                onClick={() => setIsOpen(!isOpen)}
-                className="md:hidden fixed top-4 right-4 z-50 p-2 bg-primary text-white rounded-lg shadow-lg active:scale-95 transition-transform"
+                onClick={() => setIsOpen(true)}
+                className="md:hidden fixed top-4 left-4 z-30 p-2 bg-card border border-border rounded-lg shadow-lg text-foreground hover:bg-muted transition-all active:scale-95"
             >
-                {isOpen ? <X size={24} /> : <Menu size={24} />}
+                <Menu size={24} />
             </button>
 
             {/* Overlay */}
             {isOpen && (
                 <div
-                    className="md:hidden fixed inset-0 bg-black/50 z-40"
+                    className="md:hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-40 transition-opacity"
                     onClick={closeSidebar}
                 />
             )}
 
             {/* Sidebar */}
             <aside className={`
-                w-64 bg-card border-r border-border h-screen sticky top-0 shrink-0 flex flex-col z-40 transition-all duration-300
-                md:translate-x-0
+                fixed inset-y-0 left-0 z-50 w-64 bg-card border-r border-border flex flex-col transition-transform duration-300 ease-in-out
+                md:static md:translate-x-0
                 ${isOpen ? 'translate-x-0' : '-translate-x-full'}
-                fixed md:static
             `}>
+                {/* Mobile Close Button */}
+                <button
+                    onClick={closeSidebar}
+                    className="md:hidden absolute top-4 right-4 p-2 text-muted-foreground hover:text-foreground"
+                >
+                    <X size={24} />
+                </button>
                 <div className="p-6 flex items-center justify-between">
                     <h1 className="text-xl font-bold bg-gradient-to-r from-blue-500 to-purple-600 bg-clip-text text-transparent">LinkManager</h1>
                     <ThemeToggle />

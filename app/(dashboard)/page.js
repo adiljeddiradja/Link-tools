@@ -104,20 +104,20 @@ export default function Dashboard() {
   if (!mounted) return <div className="p-8 text-white">Loading dashboard...</div>
 
   return (
-    <div className="min-h-screen bg-background text-foreground p-4 md:p-8 pb-32 transition-colors duration-300">
+    <div className="pb-32">
       {/* Header */}
-      <header className="mb-10 flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
+      <header className="mb-10 flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+        <div className="space-y-1">
           <h2 className="text-3xl font-bold bg-gradient-to-r from-blue-500 to-purple-600 bg-clip-text text-transparent">Dashboard</h2>
-          <p className="text-muted-foreground mt-1">Manage your links and view performance.</p>
+          <p className="text-muted-foreground">Manage your links and view performance.</p>
         </div>
         {!loading && userId && (
-          <div className="bg-card/50 backdrop-blur-md border border-border px-4 py-2 rounded-2xl md:rounded-full flex flex-col sm:flex-row sm:items-center gap-2 text-sm text-foreground shadow-sm">
+          <div className="bg-card/50 backdrop-blur-md border border-border px-4 py-3 rounded-2xl flex flex-col sm:flex-row sm:items-center gap-3 text-sm text-foreground shadow-sm">
             <div className="flex items-center gap-2">
               <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
-              <span className="whitespace-nowrap">Your Public Bio Link:</span>
+              <span className="whitespace-nowrap font-medium">Your Public Bio Link:</span>
             </div>
-            <a href={`/bio/${userId}`} target="_blank" className="font-mono text-primary hover:underline break-all">
+            <a href={`/bio/${userId}`} target="_blank" className="font-mono text-primary hover:underline break-all bg-muted/50 px-2 py-1 rounded">
               {protocol}//{host}/bio/{userId}
             </a>
           </div>
