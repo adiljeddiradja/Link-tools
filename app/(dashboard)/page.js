@@ -76,12 +76,15 @@ export default function Dashboard() {
   }
 
   const downloadQRCode = async (slug) => {
-    if (!mounted) return
+    if (!mounted || !slug) return
     try {
       const url = `${baseUrl}/${slug}`
+      console.log('Generating QR for:', url)
+
       const dataUrl = await QRCode.toDataURL(url, {
         width: 1024,
         margin: 2,
+        errorCorrectionLevel: 'H',
         color: {
           dark: '#000000',
           light: '#ffffff',
@@ -95,8 +98,8 @@ export default function Dashboard() {
       downloadLink.click()
       document.body.removeChild(downloadLink)
     } catch (err) {
-      console.error('Failed to generate QR code', err)
-      alert('Error downloading QR code')
+      console.error('QR Generation Error:', err)
+      alert(`Gagal download QR Code: ${err.message || 'Error tidak diketahui'}`)
     }
   }
 
