@@ -44,11 +44,12 @@ export default async function BioPage({ params }) {
         )
     }
 
-    // 2. Fetch Links for this Profile
+    // 2. Fetch Links for this Profile (only active ones)
     const { data: links, error: linksError } = await supabase
         .from('links')
         .select('*')
         .eq('profile_id', profile.id)
+        .neq('is_active', false)
         .order('created_at', { ascending: false })
 
     return (

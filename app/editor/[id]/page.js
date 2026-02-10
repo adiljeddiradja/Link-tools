@@ -88,6 +88,17 @@ export default function ProfileEditor({ params }) {
         setLinks(links.filter(l => l.id !== linkId))
     }
 
+    const handleToggleLinkActive = async (linkId, currentStatus) => {
+        const { error } = await supabase
+            .from('links')
+            .update({ is_active: !currentStatus })
+            .eq('id', linkId)
+
+        if (!error) {
+            setLinks(links.map(l => l.id === linkId ? { ...l, is_active: !currentStatus } : l))
+        }
+    }
+
     if (loading) return <div className="min-h-screen bg-slate-950 flex items-center justify-center text-white"><Loader2 className="animate-spin mr-2" /> Loading Editor...</div>
     if (!profile) return <div className="text-white">Profile not found</div>
 
@@ -223,18 +234,30 @@ export default function ProfileEditor({ params }) {
                             {/* Links List */}
                             <div className="space-y-3">
                                 {links.map(link => (
-                                    <div key={link.id} className="bg-card border border-border p-4 rounded-xl flex items-center gap-3 group hover:border-muted-foreground transition-colors">
+                                    <div key={link.id} className={`bg-card border border-border p-4 rounded-xl flex items-center gap-3 group transition-all ${link.is_active === false ? 'opacity-50' : 'opacity-100'}`}>
                                         <GripVertical className="text-muted-foreground cursor-move" size={18} />
                                         <div className="flex-1 min-w-0">
                                             <p className="text-foreground text-sm font-medium truncate">{link.title}</p>
                                             <p className="text-muted-foreground text-xs truncate">{link.original_url}</p>
                                         </div>
-                                        <button
-                                            onClick={() => handleDeleteLink(link.id)}
-                                            className="p-2 text-muted-foreground hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-colors"
-                                        >
-                                            <Trash2 size={16} />
-                                        </button>
+                                        <div className="flex items-center gap-2">
+                                            <button
+                                                onClick={() => handleToggleLinkActive(link.id, link.is_active)}
+                                                className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors focus:outline-none ${link.is_active !== false ? 'bg-green-500' : 'bg-slate-600'
+                                                    }`}
+                                            >
+                                                <span
+                                                    className={`${link.is_active !== false ? 'translate-x-5' : 'translate-x-1'
+                                                        } inline-block h-3 w-3 transform rounded-full bg-white transition-transform`}
+                                                />
+                                            </button>
+                                            <button
+                                                onClick={() => handleDeleteLink(link.id)}
+                                                className="p-2 text-muted-foreground hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-colors"
+                                            >
+                                                <Trash2 size={16} />
+                                            </button>
+                                        </div>
                                     </div>
                                 ))}
                                 {links.length === 0 && (
@@ -258,7 +281,7 @@ export default function ProfileEditor({ params }) {
 
                     {/* Screen Content */}
                     <div className="flex-1 overflow-y-auto scrollbar-hide bg-slate-900">
-                        <BioTemplate profile={profile} links={links} />
+                        <BioTemplate profile={profile} links={links.filter(l => l.is_active !== false)} />
                     </div>
                 </div>
 
