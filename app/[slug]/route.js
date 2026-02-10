@@ -10,7 +10,7 @@ export async function GET(request, { params }) {
         .from('links')
         .select('original_url, is_active')
         .eq('slug', slug)
-        .single()
+        .maybeSingle()
 
     if (data) {
         if (data.is_active === false) {

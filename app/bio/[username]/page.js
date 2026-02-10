@@ -1,6 +1,6 @@
-
 import { createClient } from '@/lib/supabaseServer'
 import BioTemplate from '@/app/components/BioTemplate'
+import { Layout } from 'lucide-react'
 
 // Force dynamic rendering since we are fetching data that might change
 export const dynamic = 'force-dynamic'
@@ -14,7 +14,7 @@ export default async function BioPage({ params }) {
         .from('profiles')
         .select('*')
         .eq('handle', username)
-        .single()
+        .maybeSingle()
 
     if (profileError || !profile) {
         return (
