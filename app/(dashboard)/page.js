@@ -78,7 +78,7 @@ export default function Dashboard() {
   const downloadQRCode = async (slug) => {
     if (!mounted) return
     try {
-      const url = `${protocol}//${host}/${slug}`
+      const url = `${baseUrl}/${slug}`
       const dataUrl = await QRCode.toDataURL(url, {
         width: 1024,
         margin: 2,
