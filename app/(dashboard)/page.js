@@ -4,7 +4,7 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabaseClient'
 import Link from 'next/link'
-import * as QRCode from 'qrcode'
+import QRCode from 'qrcode'
 import { QRCodeCanvas } from 'qrcode.react'
 import { Copy, Trash2, Globe, Link as LinkIcon, BarChart3, PlusCircle, ArrowRight, ExternalLink, QrCode as QrIcon, Download } from 'lucide-react'
 
