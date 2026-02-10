@@ -1,36 +1,85 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 🚀 LinkManager (Linktree Clone + URL Shortener)
 
-## Getting Started
+LinkManager adalah aplikasi manajemen link all-in-one yang memungkinkan Anda memendekkan URL, membuat QR Code otomatis, dan membangun halaman Bio (Linktree) kustom dengan banyak profil.
 
-First, run the development server:
+![Preview](https://img.shields.io/badge/Status-Ready_to_Host-success)
+![Framework](https://img.shields.io/badge/Next.js-15-black)
+![Database](https://img.shields.io/badge/Supabase-Auth_&_DB-emerald)
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+## ✨ Fitur Utama
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+- **🔗 URL Shortener**: Memendekkan link panjang dengan slug kustom.
+- **🖼️ QR Code Generator**: Otomatis membuat QR Code berkualitas tinggi (High-Res) untuk setiap link.
+- **📄 Multi-Profile Bio Pages**: Buat lebih dari satu halaman daftar link (seperti Linktree) dalam satu akun.
+- **🎨 Custom Editor**: Sesuaikan nama, bio, foto, warna tema, dan gaya tombol secara real-time.
+- **📱 Responsive UI**: Tampilan modern yang nyaman di desktop maupun handphone.
+- **🔐 Secure Auth**: Sistem login, signup, dan reset password menggunakan Supabase Auth terbaru (@supabase/ssr).
+- **🌗 Theme Toggle**: Mendukung mode Terang (Light) dan Gelap (Dark).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## 🛠️ Tech Stack
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- **Framework**: [Next.js 15 (App Router)](https://nextjs.org/)
+- **Styling**: [Tailwind CSS](https://tailwindcss.com/)
+- **Database & Auth**: [Supabase](https://supabase.com/)
+- **Icons**: [Lucide React](https://lucide.dev/)
+- **QR Engine**: [qrcode.react](https://www.npmjs.com/package/qrcode.react)
 
-## Learn More
+## 🚀 Persiapan Lokal (Local Setup)
 
-To learn more about Next.js, take a look at the following resources:
+1. **Clone project**:
+   ```bash
+   git clone <link-repo-anda>
+   cd link-tool
+   ```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+2. **Install dependensi**:
+   ```bash
+   npm install
+   ```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+3. **Setting Environment Variables**:
+   Buat file `.env.local` di root folder dan isi dengan kredensial Supabase Anda:
+   ```env
+   NEXT_PUBLIC_SUPABASE_URL=your_supabase_project_url
+   NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+   ```
 
-## Deploy on Vercel
+4. **Jalankan aplikasi**:
+   ```bash
+   npm run dev
+   ```
+   Buka [http://localhost:3000](http://localhost:3000) di browser Anda.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## 🗄️ Struktur Database (Supabase)
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Pastikan Anda memiliki dua table ini di Supabase:
+
+### Table: `profiles`
+- `id`: uuid (primary key)
+- `user_id`: uuid (references auth.users)
+- `handle`: text (unique, misal: 'john-doe')
+- `display_name`: text
+- `bio`: text
+- `avatar_url`: text
+- `theme_color`: text (default: 'blue')
+- `button_style`: text (default: 'rounded-xl')
+
+### Table: `links`
+- `id`: uuid (primary key)
+- `user_id`: uuid (references auth.users)
+- `profile_id`: uuid (references profiles.id, nullable)
+- `original_url`: text
+- `slug`: text (unique)
+- `title`: text
+- `is_for_bio`: boolean (default: false)
+
+## 🌍 Hosting di Vercel
+
+1. Hubungkan repository GitHub Anda ke **Vercel**.
+2. Masukkan `NEXT_PUBLIC_SUPABASE_URL` dan `NEXT_PUBLIC_SUPABASE_ANON_KEY` di tab Environment Variables.
+3. Klik **Deploy**.
+4. **PENTING**: Update **Site URL** dan **Redirect URL** di Dashboard Supabase (Settings > Auth) menggunakan URL aplikasi yang diberikan oleh Vercel.
+
+---
+
+Dibuat dengan ❤️ untuk manajemen link yang lebih mudah.
