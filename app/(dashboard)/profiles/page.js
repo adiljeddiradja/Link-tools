@@ -171,36 +171,36 @@ export default function ProfilesPage() {
                     {profiles.map(profile => (
                         <div key={profile.id} className="bg-card border border-border p-6 rounded-2xl shadow-sm hover:shadow-md transition-all group">
                             <div className="flex justify-between items-start mb-4">
-                                <div className="flex items-center gap-4">
-                                    <div className={`w-12 h-12 rounded-full flex items-center justify-center text-lg font-bold text-white shadow-lg transition-opacity ${profile.is_active === false ? 'opacity-40' : 'opacity-100'} ${profile.theme_color === 'purple' ? 'bg-purple-600' :
+                                <div className="flex items-center gap-4 min-w-0">
+                                    <div className={`w-12 h-12 rounded-full flex-shrink-0 flex items-center justify-center text-lg font-bold text-white shadow-lg transition-opacity ${profile.is_active === false ? 'opacity-40' : 'opacity-100'} ${profile.theme_color === 'purple' ? 'bg-purple-600' :
                                         profile.theme_color === 'pink' ? 'bg-pink-600' :
                                             profile.theme_color === 'light' ? 'bg-slate-400' : 'bg-blue-600'
                                         }`}>
                                         {profile.display_name?.slice(0, 2).toUpperCase() || '??'}
                                     </div>
-                                    <div>
-                                        <h3 className="font-bold text-foreground">{profile.display_name || 'Untitled'}</h3>
-                                        <a href={`${baseUrl}/bio/${profile.handle}`} target="_blank" className="text-xs text-muted-foreground hover:text-primary flex items-center gap-1 transition-colors">
-                                            {displayUrl}/bio/{profile.handle} <ExternalLink size={10} />
+                                    <div className="min-w-0 flex-1">
+                                        <h3 className="font-bold text-foreground truncate">{profile.display_name || 'Untitled'}</h3>
+                                        <a href={`${baseUrl}/bio/${profile.handle}`} target="_blank" className="text-xs text-muted-foreground hover:text-primary flex items-center gap-1 transition-colors truncate">
+                                            {displayUrl}/bio/{profile.handle} <ExternalLink size={10} className="flex-shrink-0" />
                                         </a>
                                     </div>
                                 </div>
 
-                                <div className="flex items-center gap-2">
+                                <div className="flex items-center gap-2 flex-shrink-0 ml-2">
                                     <button
                                         onClick={() => handleToggleActive(profile.id, profile.is_active)}
-                                        className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none ${profile.is_active !== false ? 'bg-green-500' : 'bg-slate-600'
+                                        className={`relative inline-flex h-5 w-9 flex-shrink-0 items-center rounded-full transition-colors focus:outline-none ${profile.is_active !== false ? 'bg-green-500' : 'bg-slate-600'
                                             }`}
                                         title={profile.is_active !== false ? 'Page is Live' : 'Page is Offline'}
                                     >
                                         <span
-                                            className={`${profile.is_active !== false ? 'translate-x-6' : 'translate-x-1'
-                                                } inline-block h-4 w-4 transform rounded-full bg-white transition-transform`}
+                                            className={`${profile.is_active !== false ? 'translate-x-5' : 'translate-x-1'
+                                                } inline-block h-3 w-3 transform rounded-full bg-white transition-transform`}
                                         />
                                     </button>
                                     <button
                                         onClick={() => handleDelete(profile.id)}
-                                        className="text-muted-foreground hover:text-red-500 p-2 hover:bg-red-500/10 rounded-lg transition-colors"
+                                        className="text-muted-foreground hover:text-red-500 p-1.5 hover:bg-red-500/10 rounded-lg transition-colors flex-shrink-0"
                                     >
                                         <Trash2 size={16} />
                                     </button>

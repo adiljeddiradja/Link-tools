@@ -294,54 +294,59 @@ export default function Dashboard() {
                   </p>
                 </div>
 
-                <div className="flex items-center gap-3 self-end sm:self-center">
-                  <button
-                    onClick={() => handleToggleActive(link.id, link.is_active)}
-                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none ${link.is_active !== false ? 'bg-green-500' : 'bg-slate-600'
-                      }`}
-                    title={link.is_active !== false ? 'Link is Active' : 'Link is Paused'}
-                  >
-                    <span
-                      className={`${link.is_active !== false ? 'translate-x-6' : 'translate-x-1'
-                        } inline-block h-4 w-4 transform rounded-full bg-white transition-transform`}
-                    />
-                  </button>
-                  <div className="p-2 bg-white rounded-lg border border-gray-100 shadow-sm">
-                    <QRCodeCanvas
-                      id={`qr-${link.slug}`}
-                      value={`${baseUrl}/${link.slug}`}
-                      size={40}
-                      level={"H"}
-                    />
+                <div className="flex flex-wrap items-center gap-2 self-end sm:self-center bg-muted/20 p-2 rounded-xl border border-border/50">
+                  <div className="flex items-center gap-2 pr-2 border-r border-border/50 mr-1">
+                    <button
+                      onClick={() => handleToggleActive(link.id, link.is_active)}
+                      className={`relative inline-flex h-5 w-9 flex-shrink-0 items-center rounded-full transition-colors focus:outline-none ${link.is_active !== false ? 'bg-green-500' : 'bg-slate-600'
+                        }`}
+                      title={link.is_active !== false ? 'Link is Active' : 'Link is Paused'}
+                    >
+                      <span
+                        className={`${link.is_active !== false ? 'translate-x-5' : 'translate-x-1'
+                          } inline-block h-3 w-3 transform rounded-full bg-white transition-transform`}
+                      />
+                    </button>
+                    <div className="p-1.5 bg-white rounded-md border border-gray-100 shadow-sm flex-shrink-0">
+                      <QRCodeCanvas
+                        id={`qr-${link.slug}`}
+                        value={`${baseUrl}/${link.slug}`}
+                        size={32}
+                        level={"H"}
+                      />
+                    </div>
                   </div>
-                  <button
-                    onClick={() => window.open(`/${link.slug}`, '_blank')}
-                    className="p-3 bg-muted hover:bg-accent text-foreground rounded-xl transition-colors"
-                    title="Open Link"
-                  >
-                    <ExternalLink size={18} />
-                  </button>
-                  <button
-                    onClick={() => downloadQRCode(link.slug)}
-                    className="p-3 bg-muted hover:bg-accent text-foreground rounded-xl transition-colors"
-                    title="Download QR Code"
-                  >
-                    <Download size={18} />
-                  </button>
-                  <button
-                    onClick={() => navigator.clipboard.writeText(`${baseUrl}/${link.slug}`)}
-                    className="p-3 bg-muted hover:bg-accent text-foreground rounded-xl transition-colors"
-                    title="Copy Link"
-                  >
-                    <Copy size={18} />
-                  </button>
-                  <button
-                    onClick={() => handleDelete(link.id)}
-                    className="p-3 bg-red-500/10 hover:bg-red-500 hover:text-white text-red-500 rounded-xl transition-all"
-                    title="Delete Link"
-                  >
-                    <Trash2 size={18} />
-                  </button>
+
+                  <div className="flex items-center gap-1.5">
+                    <button
+                      onClick={() => window.open(`/${link.slug}`, '_blank')}
+                      className="p-2.5 bg-background hover:bg-accent text-foreground rounded-lg transition-colors border border-border shadow-sm"
+                      title="Open Link"
+                    >
+                      <ExternalLink size={16} />
+                    </button>
+                    <button
+                      onClick={() => downloadQRCode(link.slug)}
+                      className="p-2.5 bg-background hover:bg-accent text-foreground rounded-lg transition-colors border border-border shadow-sm"
+                      title="Download QR Code"
+                    >
+                      <Download size={16} />
+                    </button>
+                    <button
+                      onClick={() => navigator.clipboard.writeText(`${baseUrl}/${link.slug}`)}
+                      className="p-2.5 bg-background hover:bg-accent text-foreground rounded-lg transition-colors border border-border shadow-sm"
+                      title="Copy Link"
+                    >
+                      <Copy size={16} />
+                    </button>
+                    <button
+                      onClick={() => handleDelete(link.id)}
+                      className="p-2.5 bg-red-500/10 hover:bg-red-500 hover:text-white text-red-500 rounded-lg transition-all border border-red-500/20 shadow-sm"
+                      title="Delete Link"
+                    >
+                      <Trash2 size={16} />
+                    </button>
+                  </div>
                 </div>
               </div>
             ))
