@@ -99,6 +99,11 @@ export default function Sidebar() {
                         </div>
                     )}
                 </div>
+                <div className="p-4 border-t border-border mt-auto">
+                    <p className="text-[10px] text-center text-muted-foreground uppercase tracking-widest font-semibold opacity-50">
+                        Credit by A Deel
+                    </p>
+                </div>
             </aside>
         </>
     )
