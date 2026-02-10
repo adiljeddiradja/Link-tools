@@ -107,7 +107,14 @@ export default function ProfilesPage() {
                                     placeholder="my-page"
                                     className="bg-muted border border-border p-3 pl-12 rounded-xl text-foreground w-full outline-none focus:ring-2 focus:ring-primary transition-all text-sm"
                                     value={newProfile.handle}
-                                    onChange={(e) => setNewProfile({ ...newProfile, handle: e.target.value.toLowerCase().replace(/\s+/g, '-') })}
+                                    onChange={(e) => {
+                                        let val = e.target.value.toLowerCase()
+                                        // Auto-strip protocols and domains if pasted
+                                        val = val.replace(/^https?:\/\//, '')
+                                        val = val.replace(/^[^/]+\/bio\//, '') // Strip domain/bio/
+                                        val = val.replace(/\//g, '') // Strip any remaining slashes
+                                        setNewProfile({ ...newProfile, handle: val.replace(/\s+/g, '-') })
+                                    }}
                                     required
                                 />
                             </div>

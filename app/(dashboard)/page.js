@@ -17,7 +17,9 @@ export default function Dashboard() {
   })
   const [loading, setLoading] = useState(false)
   const [userId, setUserId] = useState('')
+  const [primaryHandle, setPrimaryHandle] = useState('')
   const [mounted, setMounted] = useState(false)
+
 
   useEffect(() => {
     setMounted(true)
@@ -26,10 +28,23 @@ export default function Dashboard() {
       if (user) {
         setUserId(user.id)
         fetchLinks(user.id)
+        fetchPrimaryProfile(user.id)
       }
     }
     checkUser()
   }, [])
+
+  const fetchPrimaryProfile = async (uid) => {
+    const { data } = await supabase
+      .from('profiles')
+      .select('handle')
+      .eq('user_id', uid)
+      .limit(1)
+      .single()
+
+    if (data) setPrimaryHandle(data.handle)
+  }
+
 
   const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || (mounted ? window.location.origin : '')
   const displayUrl = baseUrl.replace(/^https?:\/\//, '') // URL for display without protocol
@@ -113,17 +128,24 @@ export default function Dashboard() {
           <h2 className="text-3xl font-bold bg-gradient-to-r from-blue-500 to-purple-600 bg-clip-text text-transparent">Dashboard</h2>
           <p className="text-muted-foreground">Manage your links and view performance.</p>
         </div>
-        {!loading && userId && (
+        {!loading && (
           <div className="bg-card/50 backdrop-blur-md border border-border px-4 py-3 rounded-2xl flex flex-col sm:flex-row sm:items-center gap-3 text-sm text-foreground shadow-sm">
             <div className="flex items-center gap-2">
               <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
               <span className="whitespace-nowrap font-medium">Your Public Bio Link:</span>
             </div>
-            <a href={`${baseUrl}/bio/${userId}`} target="_blank" className="font-mono text-primary hover:underline break-all bg-muted/50 px-2 py-1 rounded">
-              {displayUrl}/bio/{userId}
-            </a>
+            {primaryHandle ? (
+              <a href={`${baseUrl}/bio/${primaryHandle}`} target="_blank" className="font-mono text-primary hover:underline break-all bg-muted/50 px-2 py-1 rounded">
+                {displayUrl}/bio/{primaryHandle}
+              </a>
+            ) : (
+              <Link href="/profiles" className="text-muted-foreground hover:text-primary transition-colors italic">
+                Create a page in "My Pages" to get your link
+              </Link>
+            )}
           </div>
         )}
+
       </header>
 
       {/* Stats Overview */}
