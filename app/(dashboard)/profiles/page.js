@@ -12,8 +12,11 @@ export default function ProfilesPage() {
     const [userId, setUserId] = useState('')
     const [isCreating, setIsCreating] = useState(false)
     const [newProfile, setNewProfile] = useState({ handle: '', display_name: '' })
+    const [mounted, setMounted] = useState(false)
+
 
     useEffect(() => {
+        setMounted(true)
         const checkUser = async () => {
             const { data: { user } } = await supabase.auth.getUser()
             if (user) {
@@ -23,6 +26,10 @@ export default function ProfilesPage() {
         }
         checkUser()
     }, [])
+
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || (mounted ? window.location.origin : '')
+    const displayUrl = baseUrl.replace(/^https?:\/\//, '') // URL for display without protocol
+
 
     const fetchProfiles = async (uid) => {
         setLoading(true)
@@ -153,8 +160,8 @@ export default function ProfilesPage() {
                                     </div>
                                     <div>
                                         <h3 className="font-bold text-foreground">{profile.display_name || 'Untitled'}</h3>
-                                        <a href={`/bio/${profile.handle}`} target="_blank" className="text-xs text-muted-foreground hover:text-primary flex items-center gap-1 transition-colors">
-                                            /bio/{profile.handle} <ExternalLink size={10} />
+                                        <a href={`${baseUrl}/bio/${profile.handle}`} target="_blank" className="text-xs text-muted-foreground hover:text-primary flex items-center gap-1 transition-colors">
+                                            {displayUrl}/bio/{profile.handle} <ExternalLink size={10} />
                                         </a>
                                     </div>
                                 </div>
@@ -172,7 +179,7 @@ export default function ProfilesPage() {
                                     <Edit size={16} />
                                     Design & Manage
                                 </Link>
-                                <a href={`/bio/${profile.handle}`} target="_blank" className="px-4 py-2 rounded-lg border border-border text-muted-foreground hover:text-foreground hover:bg-accent transition-colors">
+                                <a href={`${baseUrl}/bio/${profile.handle}`} target="_blank" className="px-4 py-2 rounded-lg border border-border text-muted-foreground hover:text-foreground hover:bg-accent transition-colors">
                                     <span className="sr-only">View</span>
                                     <ExternalLink size={16} />
                                 </a>
