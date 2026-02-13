@@ -6,6 +6,7 @@ import { supabase } from '@/lib/supabaseClient'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { Mail, Lock, Loader2, ArrowRight, User } from 'lucide-react'
+import GeckoLogo from '@/app/components/GeckoLogo'
 
 export default function SignupPage() {
     const [email, setEmail] = useState('')
@@ -47,9 +48,10 @@ export default function SignupPage() {
     return (
         <div className="min-h-screen flex items-center justify-center bg-background p-4 transition-colors duration-300">
             <div className="w-full max-w-md bg-card border border-border p-8 rounded-2xl shadow-xl">
-                <div className="text-center mb-8">
-                    <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-500 to-purple-600 bg-clip-text text-transparent mb-2">Create Account</h1>
-                    <p className="text-muted-foreground">Start building your bio pages today</p>
+                <div className="text-center mb-10 flex flex-col items-center">
+                    <GeckoLogo className="w-20 h-20 text-primary mb-6 animate-pulse" />
+                    <h1 className="text-3xl font-bold text-foreground mb-2">Create Account</h1>
+                    <p className="text-muted-foreground font-medium">Join us and start building today</p>
                 </div>
 
                 {error && (

@@ -6,6 +6,7 @@ import { supabase } from '@/lib/supabaseClient'
 import Link from 'next/link'
 import { LayoutDashboard, User, ExternalLink, Layout, LogOut, Menu, X } from 'lucide-react'
 import { ThemeToggle } from '@/app/components/ThemeToggle'
+import GeckoLogo from '@/app/components/GeckoLogo'
 
 export default function Sidebar() {
     const router = useRouter()
@@ -60,7 +61,9 @@ export default function Sidebar() {
                     <X size={24} />
                 </button>
                 <div className="p-6 flex items-center justify-between">
-                    <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-500 to-purple-600 bg-clip-text text-transparent">Linkiez</h1>
+                    <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
+                        <GeckoLogo className="w-10 h-10 text-primary" />
+                    </Link>
                     <ThemeToggle />
                 </div>
                 <nav className="flex-1 px-4 space-y-2">

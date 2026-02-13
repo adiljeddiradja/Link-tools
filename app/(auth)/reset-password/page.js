@@ -5,6 +5,7 @@ import { useState } from 'react'
 import { supabase } from '@/lib/supabaseClient'
 import Link from 'next/link'
 import { Mail, Loader2, ArrowLeft, Send } from 'lucide-react'
+import GeckoLogo from '@/app/components/GeckoLogo'
 
 export default function ResetPasswordPage() {
     const [email, setEmail] = useState('')
@@ -40,7 +41,8 @@ export default function ResetPasswordPage() {
                     <ArrowLeft size={16} /> Back to Login
                 </Link>
 
-                <div className="text-center mb-8">
+                <div className="text-center mb-8 flex flex-col items-center">
+                    <GeckoLogo className="w-16 h-16 text-primary mb-4" />
                     <h1 className="text-2xl font-bold text-foreground mb-2">Reset Password</h1>
                     <p className="text-muted-foreground">Enter your email to receive a reset link</p>
                 </div>
