@@ -1,11 +1,13 @@
-
-import { supabase } from '@/lib/supabaseClient'
+import { createClient } from '@/lib/supabaseServer'
 import { redirect } from 'next/navigation'
+
+export const dynamic = 'force-dynamic'
 
 export async function GET(request, { params }) {
     const { slug } = await params
     console.log('Redirecting slug:', slug) // Debug log
 
+    const supabase = await createClient()
     const { data, error } = await supabase
         .from('links')
         .select('original_url, is_active')
@@ -17,7 +19,7 @@ export async function GET(request, { params }) {
             return new Response(`
                 <html>
                     <body style="font-family: sans-serif; display: flex; align-items: center; justify-center; height: 100vh; margin: 0; background: #0f172a; color: white; text-align: center;">
-                        <div style="padding: 20px;">
+                        <div style="padding: 20px; width: 100%;">
                             <h1 style="color: #64748b;">⚠️ Link Tidak Aktif</h1>
                             <p>Maaf, link ini sedang dinonaktifkan sementara oleh pemiliknya.</p>
                             <p style="font-size: 0.8rem; margin-top: 2rem; color: #475569;">Credit by A Deel</p>
