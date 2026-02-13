@@ -62,7 +62,7 @@ export default function Sidebar() {
                 </button>
                 <div className="p-6 flex items-center justify-between">
                     <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
-                        <GeckoLogo className="w-10 h-10 text-primary" />
+                        <GeckoLogo className="w-20 h-14 text-primary" />
                     </Link>
                     <ThemeToggle />
                 </div>
@@ -75,12 +75,6 @@ export default function Sidebar() {
                         <Layout size={20} className="group-hover:text-purple-500 transition-colors" />
                         <span className="font-medium">My Pages</span>
                     </Link>
-                    {/* 
-                <Link href="/bio/demo-user" className="flex items-center gap-3 px-4 py-3 text-muted-foreground hover:bg-accent hover:text-foreground rounded-xl transition-all group">
-                    <User size={20} className="group-hover:text-pink-500 transition-colors" />
-                    <span className="font-medium">My Bio Page</span>
-                </Link> 
-                */}
                 </nav>
                 <div className="p-4 border-t border-border">
                     {user ? (

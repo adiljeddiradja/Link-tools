@@ -1,5 +1,5 @@
-
 import { ExternalLink, Github, Twitter, Instagram, Linkedin, Globe, Mail } from 'lucide-react'
+import GeckoLogo from '@/app/components/GeckoLogo'
 
 export default function BioTemplate({ profile, links }) {
     if (!profile) return null

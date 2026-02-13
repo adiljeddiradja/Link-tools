@@ -49,7 +49,7 @@ export default function SignupPage() {
         <div className="min-h-screen flex items-center justify-center bg-background p-4 transition-colors duration-300">
             <div className="w-full max-w-md bg-card border border-border p-8 rounded-2xl shadow-xl">
                 <div className="text-center mb-10 flex flex-col items-center">
-                    <GeckoLogo className="w-20 h-20 text-primary mb-6 animate-pulse" />
+                    <GeckoLogo className="w-48 h-32 text-primary mb-8 animate-pulse" />
                     <h1 className="text-3xl font-bold text-foreground mb-2">Create Account</h1>
                     <p className="text-muted-foreground font-medium">Join us and start building today</p>
                 </div>

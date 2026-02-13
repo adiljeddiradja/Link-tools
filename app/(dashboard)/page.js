@@ -123,7 +123,6 @@ export default function Dashboard() {
     if (!mounted || !slug) return
     try {
       const url = `${baseUrl}/${slug}`
-      console.log('Generating QR for:', url)
 
       const dataUrl = await QRCode.toDataURL(url, {
         width: 1024,
