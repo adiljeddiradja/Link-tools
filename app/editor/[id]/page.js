@@ -248,8 +248,8 @@ export default function ProfileEditor({ params }) {
                             {/* Theme */}
                             <div className="space-y-3">
                                 <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Theme</label>
-                                <div className="grid grid-cols-5 gap-2">
-                                    {['blue', 'purple', 'pink', 'light', 'glass'].map(color => (
+                                <div className="grid grid-cols-6 gap-2">
+                                    {['blue', 'purple', 'pink', 'light', 'glass', 'lilac'].map(color => (
                                         <button
                                             key={color}
                                             onClick={() => setProfile({ ...profile, theme_color: color })}
@@ -257,7 +257,8 @@ export default function ProfileEditor({ params }) {
                                                 color === 'purple' ? 'bg-[#2e1065]' :
                                                     color === 'pink' ? 'bg-[#831843]' :
                                                         color === 'glass' ? 'bg-slate-900 border-white/10 ring-1 ring-white/5' :
-                                                            'bg-slate-100'
+                                                            color === 'lilac' ? 'bg-[#f5f3ff] border-[#e9d5ff]' :
+                                                                'bg-slate-100'
                                                 }`}
                                             title={color}
                                         />

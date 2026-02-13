@@ -15,6 +15,7 @@ export default function BioTemplate({ profile, links }) {
         pink: { bg: 'bg-[#831843]', accent: 'text-pink-400', button: 'bg-white/10 border-white/10 hover:border-pink-400/50', text: 'text-white' },
         light: { bg: 'bg-slate-50', accent: 'text-blue-600', button: 'bg-white border-slate-200 hover:border-blue-400 shadow-sm', text: 'text-slate-900' },
         glass: { bg: 'bg-slate-950', accent: 'text-cyan-400', button: 'bg-white/5 border-white/10 hover:border-white/20 hover:bg-white/10 backdrop-blur-xl', text: 'text-white' },
+        lilac: { bg: 'bg-[#faf5ff]', accent: 'text-purple-600', button: 'bg-white/60 backdrop-blur-md border-purple-100 hover:border-purple-300 shadow-sm', text: 'text-slate-800' },
     }
 
     const currentTheme = themes[profile.theme_color] || themes.blue
@@ -79,8 +80,8 @@ export default function BioTemplate({ profile, links }) {
 
             {!profile.custom_bg && !profile.banner_url && (
                 <>
-                    <div className={`absolute top-0 left-1/4 w-96 h-96 ${profile.theme_color === 'glass' ? 'bg-cyan-500/10' : profile.theme_color === 'light' ? 'bg-blue-200/50' : 'bg-purple-600/20'} rounded-full blur-[128px] pointer-events-none`} />
-                    <div className={`absolute bottom-0 right-1/4 w-96 h-96 ${profile.theme_color === 'glass' ? 'bg-blue-500/10' : profile.theme_color === 'light' ? 'bg-purple-200/50' : 'bg-blue-600/20'} rounded-full blur-[128px] pointer-events-none`} />
+                    <div className={`absolute top-0 left-1/4 w-96 h-96 ${profile.theme_color === 'glass' ? 'bg-cyan-500/10' : profile.theme_color === 'lilac' ? 'bg-purple-300/30' : profile.theme_color === 'light' ? 'bg-blue-200/50' : 'bg-purple-600/20'} rounded-full blur-[128px] pointer-events-none`} />
+                    <div className={`absolute bottom-0 right-1/4 w-96 h-96 ${profile.theme_color === 'glass' ? 'bg-blue-500/10' : profile.theme_color === 'lilac' ? 'bg-indigo-200/40' : profile.theme_color === 'light' ? 'bg-purple-200/50' : 'bg-blue-600/20'} rounded-full blur-[128px] pointer-events-none`} />
                     {profile.theme_color === 'glass' && (
                         <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 pointer-events-none" />
                     )}
