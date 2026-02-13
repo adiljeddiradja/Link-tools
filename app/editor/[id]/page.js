@@ -89,13 +89,14 @@ export default function ProfileEditor({ params }) {
     }
 
     const handleToggleLinkActive = async (linkId, currentStatus) => {
+        const newStatus = currentStatus === false ? true : false
         const { error } = await supabase
             .from('links')
-            .update({ is_active: !currentStatus })
+            .update({ is_active: newStatus })
             .eq('id', linkId)
 
         if (!error) {
-            setLinks(links.map(l => l.id === linkId ? { ...l, is_active: !currentStatus } : l))
+            setLinks(links.map(l => l.id === linkId ? { ...l, is_active: newStatus } : l))
         }
     }
 

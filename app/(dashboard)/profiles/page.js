@@ -67,13 +67,14 @@ export default function ProfilesPage() {
     }
 
     const handleToggleActive = async (id, currentStatus) => {
+        const newStatus = currentStatus === false ? true : false
         const { error } = await supabase
             .from('profiles')
-            .update({ is_active: !currentStatus })
+            .update({ is_active: newStatus })
             .eq('id', id)
 
         if (!error) {
-            setProfiles(profiles.map(p => p.id === id ? { ...p, is_active: !currentStatus } : p))
+            setProfiles(profiles.map(p => p.id === id ? { ...p, is_active: newStatus } : p))
         } else {
             alert('Error updating status: ' + error.message)
         }

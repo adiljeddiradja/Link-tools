@@ -85,13 +85,14 @@ export default function Dashboard() {
   }
 
   const handleToggleActive = async (id, currentStatus) => {
+    const newStatus = currentStatus === false ? true : false
     const { error } = await supabase
       .from('links')
-      .update({ is_active: !currentStatus })
+      .update({ is_active: newStatus })
       .eq('id', id)
 
     if (!error) {
-      setLinks(links.map(link => link.id === id ? { ...link, is_active: !currentStatus } : link))
+      setLinks(links.map(link => link.id === id ? { ...link, is_active: newStatus } : link))
     } else {
       alert('Error updating link status: ' + error.message)
     }
