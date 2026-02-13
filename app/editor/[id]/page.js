@@ -58,6 +58,7 @@ export default function ProfileEditor({ params }) {
             theme_color: profile.theme_color,
             button_style: profile.button_style,
             avatar_url: profile.avatar_url,
+            banner_url: profile.banner_url,
             social_links: profile.social_links,
             font_family: profile.font_family,
             custom_bg: profile.custom_bg
@@ -183,6 +184,13 @@ export default function ProfileEditor({ params }) {
                                     value={profile.avatar_url || ''}
                                     onChange={e => setProfile({ ...profile, avatar_url: e.target.value })}
                                     placeholder="Logo Image URL (https://...)"
+                                    className="w-full bg-muted border border-border rounded-xl p-3 text-foreground focus:border-primary outline-none transition-all text-sm"
+                                />
+                                <input
+                                    type="text"
+                                    value={profile.banner_url || ''}
+                                    onChange={e => setProfile({ ...profile, banner_url: e.target.value })}
+                                    placeholder="Banner Image URL (https://...)"
                                     className="w-full bg-muted border border-border rounded-xl p-3 text-foreground focus:border-primary outline-none transition-all text-sm"
                                 />
                                 <textarea

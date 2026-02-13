@@ -41,6 +41,17 @@ export default function BioTemplate({ profile, links }) {
             className={`min-h-screen flex flex-col items-center py-16 px-4 ${!profile.custom_bg ? currentTheme.bg : ''} ${currentTheme.text} ${currentFont} relative overflow-hidden transition-colors duration-500`}
             style={profile.custom_bg ? { background: profile.custom_bg } : {}}
         >
+            {/* Banner Section */}
+            {profile.banner_url && (
+                <div className="absolute top-0 left-0 w-full h-48 md:h-64 z-0">
+                    <img
+                        src={profile.banner_url}
+                        alt="Banner"
+                        className="w-full h-full object-cover opacity-60"
+                    />
+                    <div className={`absolute inset-0 bg-gradient-to-b from-transparent ${!profile.custom_bg ? currentTheme.bg : 'to-transparent'}`} />
+                </div>
+            )}
             {/* Background Ambience (only show if using default themes) */}
             {!profile.custom_bg && (
                 <>
@@ -50,7 +61,7 @@ export default function BioTemplate({ profile, links }) {
             )}
 
             {/* Profile Header */}
-            <div className="flex flex-col items-center mb-10 space-y-6 relative z-10 animate-fade-in-up w-full max-w-md">
+            <div className={`flex flex-col items-center mb-10 space-y-6 relative z-10 animate-fade-in-up w-full max-w-md ${profile.banner_url ? 'mt-32' : ''}`}>
                 <div className="relative group cursor-pointer transform hover:scale-105 transition-transform duration-300">
                     <div className={`absolute -inset-1 bg-gradient-to-r ${profile.theme_color === 'light' ? 'from-blue-400 to-purple-400' : 'from-pink-600 to-purple-600'} rounded-full blur opacity-75 group-hover:opacity-100 transition duration-1000 group-hover:duration-200`}></div>
                     <div className={`relative w-28 h-28 rounded-full ${profile.theme_color === 'light' ? 'bg-white' : 'bg-slate-900'} border-4 ${profile.theme_color === 'light' ? 'border-slate-100' : 'border-slate-800'} flex items-center justify-center text-4xl font-bold overflow-hidden shadow-2xl`}>
