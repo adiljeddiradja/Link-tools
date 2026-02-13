@@ -1,5 +1,9 @@
-import { ExternalLink, Github, Twitter, Instagram, Linkedin, Globe, Mail } from 'lucide-react'
+'use client'
+
+import { ExternalLink, Github, Twitter, Instagram, Linkedin, Globe, Mail, CheckCircle2 } from 'lucide-react'
 import GeckoLogo from '@/app/components/GeckoLogo'
+import { motion, AnimatePresence } from 'framer-motion'
+import { getYouTubeId, getSpotifyId } from '@/lib/utils'
 
 export default function BioTemplate({ profile, links }) {
     if (!profile) return null
@@ -10,6 +14,7 @@ export default function BioTemplate({ profile, links }) {
         purple: { bg: 'bg-[#2e1065]', accent: 'text-purple-400', button: 'bg-white/10 border-white/10 hover:border-purple-400/50', text: 'text-white' },
         pink: { bg: 'bg-[#831843]', accent: 'text-pink-400', button: 'bg-white/10 border-white/10 hover:border-pink-400/50', text: 'text-white' },
         light: { bg: 'bg-slate-50', accent: 'text-blue-600', button: 'bg-white border-slate-200 hover:border-blue-400 shadow-sm', text: 'text-slate-900' },
+        glass: { bg: 'bg-slate-950', accent: 'text-cyan-400', button: 'bg-white/5 border-white/10 hover:border-white/20 hover:bg-white/10 backdrop-blur-xl', text: 'text-white' },
     }
 
     const currentTheme = themes[profile.theme_color] || themes.blue
@@ -20,11 +25,10 @@ export default function BioTemplate({ profile, links }) {
         'sans-serif': 'font-sans',
         'serif': 'font-serif',
         'mono': 'font-mono',
-        'display': 'font-display', // Assuming custom font classes or default ones
+        'display': 'font-display',
     }
     const currentFont = fontStyles[profile.font_family] || 'font-sans'
 
-    // Social Links mapping
     const socialIcons = {
         instagram: <Instagram size={20} />,
         twitter: <Twitter size={20} />,
@@ -36,35 +40,61 @@ export default function BioTemplate({ profile, links }) {
 
     const initials = profile.display_name ? profile.display_name.slice(0, 2).toUpperCase() : '??'
 
+    // Sort links by position
+    const sortedLinks = [...(links || [])].sort((a, b) => (a.position || 0) - (b.position || 0))
+
+    const getBackgroundStyles = () => {
+        if (profile.bg_type === 'color' && profile.bg_color) return { backgroundColor: profile.bg_color }
+        if (profile.bg_type === 'gradient' && profile.bg_gradient) return { background: profile.bg_gradient }
+        if (profile.bg_type === 'animated') return {
+            background: 'linear-gradient(-45deg, #0f172a, #1e1b4b, #312e81, #1e1b4b)',
+            backgroundSize: '400% 400%',
+        }
+        if (profile.custom_bg) return { background: profile.custom_bg }
+        return {}
+    }
+
     return (
         <div
-            className={`min-h-screen flex flex-col items-center py-16 px-4 ${!profile.custom_bg ? currentTheme.bg : ''} ${currentTheme.text} ${currentFont} relative overflow-hidden transition-colors duration-500`}
-            style={profile.custom_bg ? { background: profile.custom_bg } : {}}
+            className={`min-h-screen flex flex-col items-center py-16 px-4 ${(!profile.bg_type || profile.bg_type === 'theme') && !profile.custom_bg ? currentTheme.bg : ''} ${currentTheme.text} ${currentFont} relative overflow-hidden transition-all duration-700 ${profile.bg_type === 'animated' ? 'animate-aurora' : ''}`}
+            style={getBackgroundStyles()}
         >
-            {/* Banner Section (Facebook-style Cover) */}
-            {profile.banner_url && (
-                <div className="absolute top-0 left-0 w-full h-56 md:h-72 z-0">
-                    <img
-                        src={profile.banner_url}
-                        alt="Banner"
-                        className="w-full h-full object-cover"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-black/40" />
-                </div>
-            )}
+            <AnimatePresence>
+                {/* Banner Section */}
+                {profile.banner_url && (
+                    <motion.div
+                        initial={{ opacity: 0, y: -20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="absolute top-0 left-0 w-full h-56 md:h-72 z-0"
+                    >
+                        <img
+                            src={profile.banner_url}
+                            alt="Banner"
+                            className="w-full h-full object-cover"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-black/40" />
+                    </motion.div>
+                )}
+            </AnimatePresence>
 
-            {/* Background Ambience (only show if using default themes and NO banner) */}
             {!profile.custom_bg && !profile.banner_url && (
                 <>
-                    <div className={`absolute top-0 left-1/4 w-96 h-96 ${profile.theme_color === 'light' ? 'bg-blue-200/50' : 'bg-purple-600/20'} rounded-full blur-[128px] pointer-events-none`} />
-                    <div className={`absolute bottom-0 right-1/4 w-96 h-96 ${profile.theme_color === 'light' ? 'bg-purple-200/50' : 'bg-blue-600/20'} rounded-full blur-[128px] pointer-events-none`} />
+                    <div className={`absolute top-0 left-1/4 w-96 h-96 ${profile.theme_color === 'glass' ? 'bg-cyan-500/10' : profile.theme_color === 'light' ? 'bg-blue-200/50' : 'bg-purple-600/20'} rounded-full blur-[128px] pointer-events-none`} />
+                    <div className={`absolute bottom-0 right-1/4 w-96 h-96 ${profile.theme_color === 'glass' ? 'bg-blue-500/10' : profile.theme_color === 'light' ? 'bg-purple-200/50' : 'bg-blue-600/20'} rounded-full blur-[128px] pointer-events-none`} />
+                    {profile.theme_color === 'glass' && (
+                        <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 pointer-events-none" />
+                    )}
                 </>
             )}
 
             {/* Profile Header */}
-            <div className={`flex flex-col items-center mb-8 space-y-4 relative z-10 animate-fade-in-up w-full max-w-md ${profile.banner_url ? 'mt-36' : ''}`}>
-                <div className="relative group transform hover:scale-105 transition-transform duration-300">
-                    {/* Ring for Overlap Effect */}
+            <motion.div
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.5 }}
+                className={`flex flex-col items-center mb-8 space-y-4 relative z-10 w-full max-w-md ${profile.banner_url ? 'mt-36' : ''}`}
+            >
+                <div className="relative group transition-transform duration-300">
                     <div className={`absolute -inset-1 blur-sm opacity-50 ${profile.theme_color === 'light' ? 'bg-slate-200' : 'bg-slate-800'} rounded-full`}></div>
                     <div className={`relative w-32 h-32 rounded-full border-[6px] ${profile.theme_color === 'light' ? 'border-white' : 'border-[#0f172a]'} shadow-2xl overflow-hidden flex items-center justify-center bg-muted`}>
                         {profile.avatar_url ? (
@@ -78,19 +108,26 @@ export default function BioTemplate({ profile, links }) {
                 </div>
 
                 <div className="text-center space-y-2 w-full">
-                    <h1 className="text-3xl font-bold tracking-tight">{profile.display_name}</h1>
+                    <div className="flex items-center justify-center gap-2">
+                        <h1 className="text-3xl font-bold tracking-tight">{profile.display_name}</h1>
+                        {profile.is_verified && (
+                            <CheckCircle2 size={24} className="text-blue-500 fill-blue-500/10" />
+                        )}
+                    </div>
                     <p className={`text-sm leading-relaxed ${profile.theme_color === 'light' ? 'text-slate-600' : 'text-slate-400'}`}>
                         {profile.bio || `Welcome to my page. @${profile.handle}`}
                     </p>
                 </div>
 
-                {/* Social Icons */}
                 {profile.social_links && Object.keys(profile.social_links).length > 0 && (
                     <div className={`flex flex-wrap justify-center gap-4 ${profile.theme_color === 'light' ? 'text-slate-500' : 'text-slate-300'}`}>
-                        {Object.entries(profile.social_links).map(([platform, url]) => (
+                        {Object.entries(profile.social_links).map(([platform, url], i) => (
                             url && (
-                                <a
+                                <motion.a
                                     key={platform}
+                                    initial={{ opacity: 0, y: 10 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ delay: 0.2 + (i * 0.1) }}
                                     href={url.startsWith('http') ? url : `https://${url}`}
                                     target="_blank"
                                     rel="noopener noreferrer"
@@ -98,24 +135,26 @@ export default function BioTemplate({ profile, links }) {
                                     title={platform}
                                 >
                                     {socialIcons[platform] || <Globe size={20} />}
-                                </a>
+                                </motion.a>
                             )
                         ))}
                     </div>
                 )}
-            </div>
+            </motion.div>
 
             {/* Links Stack */}
-            <div className="w-full max-w-md space-y-4 relative z-10 perspective-1000">
-                {links && links.filter(l => l.is_hidden !== true).length > 0 ? (
-                    links.filter(l => l.is_hidden !== true).map((link, index) => (
-                        <a
+            <div className="w-full max-w-md space-y-4 relative z-10">
+                {sortedLinks && sortedLinks.filter(l => l.is_hidden !== true).length > 0 ? (
+                    sortedLinks.filter(l => l.is_hidden !== true).map((link, index) => (
+                        <motion.a
                             key={link.id}
+                            initial={{ opacity: 0, x: -20 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            transition={{ delay: 0.3 + (index * 0.1) }}
                             href={link.original_url}
                             target="_blank"
                             rel="noopener noreferrer"
                             className={`block w-full backdrop-blur-md border ${currentTheme.button} ${buttonStyle} p-4 text-center transition-all duration-300 transform hover:-translate-y-1 hover:shadow-xl group relative overflow-hidden`}
-                            style={{ animationDelay: `${index * 100}ms` }}
                         >
                             <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/10 to-white/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700 pointer-events-none" />
 
@@ -128,7 +167,36 @@ export default function BioTemplate({ profile, links }) {
                                     <ExternalLink size={16} className={`opacity-0 group-hover:opacity-100 transition-all transform translate-x-2 group-hover:translate-x-0 ${currentTheme.accent}`} />
                                 </div>
                             </div>
-                        </a>
+
+                            {/* YouTube Embed Logic */}
+                            {getYouTubeId(link.original_url) && (
+                                <div className="mt-4 aspect-video w-full rounded-xl overflow-hidden border border-white/10 shadow-2xl">
+                                    <iframe
+                                        width="100%"
+                                        height="100%"
+                                        src={`https://www.youtube.com/embed/${getYouTubeId(link.original_url)}`}
+                                        title="YouTube video player"
+                                        frameBorder="0"
+                                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                        allowFullScreen
+                                    ></iframe>
+                                </div>
+                            )}
+
+                            {/* Spotify Embed Logic */}
+                            {getSpotifyId(link.original_url) && (
+                                <div className="mt-4 w-full rounded-xl overflow-hidden shadow-xl border border-white/5">
+                                    <iframe
+                                        src={`https://open.spotify.com/embed/${getSpotifyId(link.original_url).type}/${getSpotifyId(link.original_url).id}`}
+                                        width="100%"
+                                        height={getSpotifyId(link.original_url).type === 'track' ? "80" : "152"}
+                                        frameBorder="0"
+                                        allowtransparency="true"
+                                        allow="encrypted-media"
+                                    ></iframe>
+                                </div>
+                            )}
+                        </motion.a>
                     ))
                 ) : (
                     <div className={`text-center p-8 rounded-2xl border border-dashed ${profile.theme_color === 'light' ? 'border-slate-300 text-slate-400' : 'border-slate-700 text-slate-600'}`}>
@@ -142,16 +210,6 @@ export default function BioTemplate({ profile, links }) {
                 <div className={`w-12 h-0.5 ${profile.theme_color === 'light' ? 'bg-slate-200' : 'bg-slate-800'}`} />
                 <p>Created by A Deel</p>
             </footer>
-
-            <style>{`
-        @keyframes fade-in-up {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        .animate-fade-in-up {
-            animation: fade-in-up 0.8s ease-out forwards;
-        }
-      `}</style>
         </div>
     )
 }

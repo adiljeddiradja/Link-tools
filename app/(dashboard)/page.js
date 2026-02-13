@@ -19,6 +19,7 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(false)
   const [userId, setUserId] = useState('')
   const [primaryHandle, setPrimaryHandle] = useState('')
+  const [totalClicks, setTotalClicks] = useState(0)
   const [mounted, setMounted] = useState(false)
 
 
@@ -30,6 +31,7 @@ export default function Dashboard() {
         setUserId(user.id)
         fetchLinks(user.id)
         fetchPrimaryProfile(user.id)
+        fetchTotalClicks(user.id)
       }
     }
     checkUser()
@@ -60,12 +62,41 @@ export default function Dashboard() {
     if (data) setLinks(data)
   }
 
+  const fetchTotalClicks = async (uid) => {
+    // Fetch total clicks for all links belonging to the user
+    const { count, error } = await supabase
+      .from('clicks')
+      .select('*', { count: 'exact', head: true })
+      .in('link_id', links.map(l => l.id))
+
+    // Note: This might be inaccurate if 'links' hasn't loaded yet.
+    // Better way: fetch by profile_id or join.
+    // For now, let's fetch all clicks for links where user_id = uid via profile/link hierarchy
+    const { data: userLinks } = await supabase.from('links').select('id').eq('user_id', uid)
+    const linkIds = userLinks.map(l => l.id)
+
+    if (linkIds.length > 0) {
+      const { count: clickCount } = await supabase
+        .from('clicks')
+        .select('*', { count: 'exact', head: true })
+        .in('link_id', linkIds)
+
+      setTotalClicks(clickCount || 0)
+    }
+  }
+
   const handleSubmit = async (e) => {
     e.preventDefault()
     setLoading(true)
 
+    let url = formData.original_url
+    if (url && !url.startsWith('http://') && !url.startsWith('https://')) {
+      url = 'https://' + url
+    }
+
     const newLink = {
       ...formData,
+      original_url: url,
       user_id: userId,
       slug: formData.slug || Math.random().toString(36).substring(7) // Generate random slug if empty
     }
@@ -207,7 +238,7 @@ export default function Dashboard() {
             </div>
             <div>
               <p className="text-sm text-muted-foreground font-medium">Total Clicks</p>
-              <h3 className="text-2xl font-bold text-foreground">0</h3>
+              <h3 className="text-2xl font-bold text-foreground">{totalClicks}</h3>
             </div>
           </div>
         </div>
@@ -228,8 +259,8 @@ export default function Dashboard() {
               <div>
                 <label className="block text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Original URL</label>
                 <input
-                  type="url"
-                  placeholder="https://example.com/long-url"
+                  type="text"
+                  placeholder="example.com/long-url"
                   className="w-full bg-muted border border-border rounded-xl px-4 py-3 text-foreground placeholder-muted-foreground focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all"
                   value={formData.original_url}
                   onChange={(e) => setFormData({ ...formData, original_url: e.target.value })}

@@ -5,8 +5,25 @@ import { useState, useEffect, use } from 'react'
 import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabaseClient'
 import BioTemplate from '@/app/components/BioTemplate'
-import { Save, Plus, Trash2, ArrowLeft, Loader2, GripVertical, ExternalLink } from 'lucide-react'
+import { Save, Plus, Trash2, ArrowLeft, Loader2, GripVertical, ExternalLink, CheckCircle2, Wand2, Palette, Zap } from 'lucide-react'
 import Link from 'next/link'
+
+// DND Kit Imports
+import {
+    DndContext,
+    closestCenter,
+    KeyboardSensor,
+    PointerSensor,
+    useSensor,
+    useSensors,
+} from '@dnd-kit/core'
+import {
+    arrayMove,
+    SortableContext,
+    sortableKeyboardCoordinates,
+    verticalListSortingStrategy,
+} from '@dnd-kit/sortable'
+import { SortableLinkItem } from '@/app/components/SortableLinkItem'
 
 export default function ProfileEditor({ params }) {
     const { id } = use(params)
@@ -16,6 +33,14 @@ export default function ProfileEditor({ params }) {
     const [saving, setSaving] = useState(false)
     const [activeTab, setActiveTab] = useState('design') // design, links, socials
     const [newLink, setNewLink] = useState({ title: '', url: '' })
+
+    // DND Sensors
+    const sensors = useSensors(
+        useSensor(PointerSensor),
+        useSensor(KeyboardSensor, {
+            coordinateGetter: sortableKeyboardCoordinates,
+        })
+    )
 
     // Fetch initial data
     useEffect(() => {
@@ -27,15 +52,11 @@ export default function ProfileEditor({ params }) {
 
         // Check Auth
         const { data: { user } } = await supabase.auth.getUser()
-        if (!user) {
-            // Should be handled by middleware, but extra safety
-            return
-        }
+        if (!user) return
 
         // Fetch Profile
         const { data: p } = await supabase.from('profiles').select('*').eq('id', id).single()
         if (p) {
-            // Verify ownership
             if (p.user_id !== user.id) {
                 alert("Unauthorized access")
                 return
@@ -43,8 +64,12 @@ export default function ProfileEditor({ params }) {
             setProfile(p)
         }
 
-        // Fetch Links
-        const { data: l } = await supabase.from('links').select('*').eq('profile_id', id).order('created_at', { ascending: false })
+        // Fetch Links sorted by position
+        const { data: l } = await supabase
+            .from('links')
+            .select('*')
+            .eq('profile_id', id)
+            .order('position', { ascending: true })
         if (l) setLinks(l)
 
         setLoading(false)
@@ -61,12 +86,15 @@ export default function ProfileEditor({ params }) {
             banner_url: profile.banner_url,
             social_links: profile.social_links,
             font_family: profile.font_family,
-            custom_bg: profile.custom_bg
+            custom_bg: profile.custom_bg,
+            is_verified: profile.is_verified,
+            bg_type: profile.bg_type,
+            bg_color: profile.bg_color,
+            bg_gradient: profile.bg_gradient
         }).eq('id', id)
 
         if (error) {
             alert("Error saving profiles: " + error.message)
-            console.error("Save error:", error)
         } else {
             alert("Changes saved successfully!")
         }
@@ -79,17 +107,26 @@ export default function ProfileEditor({ params }) {
 
         const { data: { user } } = await supabase.auth.getUser()
 
+        // Use the count of existing links to set the next position
+        const nextPosition = links.length + 1
+
+        let url = newLink.url
+        if (url && !url.startsWith('http://') && !url.startsWith('https://')) {
+            url = 'https://' + url
+        }
+
         const { data, error } = await supabase.from('links').insert([{
             profile_id: id,
             user_id: user.id,
-            original_url: newLink.url,
-            title: newLink.title || newLink.url,
-            slug: Math.random().toString(36).substring(7), // Random slug for shortlink compatibility
-            is_for_bio: true
+            original_url: url,
+            title: newLink.title || url,
+            slug: Math.random().toString(36).substring(7),
+            is_for_bio: true,
+            position: nextPosition
         }]).select()
 
         if (data) {
-            setLinks([data[0], ...links])
+            setLinks([...links, data[0]])
             setNewLink({ title: '', url: '' })
         }
     }
@@ -101,26 +138,34 @@ export default function ProfileEditor({ params }) {
 
     const handleToggleLinkActive = async (linkId, currentStatus) => {
         const newStatus = currentStatus === false ? true : false
-        const { error } = await supabase
-            .from('links')
-            .update({ is_active: newStatus })
-            .eq('id', linkId)
-
-        if (!error) {
-            setLinks(links.map(l => l.id === linkId ? { ...l, is_active: newStatus } : l))
-        }
+        await supabase.from('links').update({ is_active: newStatus }).eq('id', linkId)
+        setLinks(links.map(l => l.id === linkId ? { ...l, is_active: newStatus } : l))
     }
 
     const handleToggleLinkHidden = async (linkId, currentStatus) => {
         const newStatus = currentStatus === true ? false : true
-        const { error } = await supabase
-            .from('links')
-            .update({ is_hidden: newStatus })
-            .eq('id', linkId)
+        await supabase.from('links').update({ is_hidden: newStatus }).eq('id', linkId)
+        setLinks(links.map(l => l.id === linkId ? { ...l, is_hidden: newStatus } : l))
+    }
 
-        if (!error) {
-            setLinks(links.map(l => l.id === linkId ? { ...l, is_hidden: newStatus } : l))
-        }
+    const handleDragEnd = async (event) => {
+        const { active, over } = event
+        if (!over || active.id === over.id) return
+
+        const oldIndex = links.findIndex((item) => item.id === active.id)
+        const newIndex = links.findIndex((item) => item.id === over.id)
+
+        const newLinks = arrayMove(links, oldIndex, newIndex)
+        setLinks(newLinks)
+
+        // Save new positions to database
+        const updates = newLinks.map((link, index) => ({
+            id: link.id,
+            position: index + 1
+        }))
+
+        // We use upsert for batch update in Supabase
+        await supabase.from('links').upsert(updates)
     }
 
     const updateSocialLink = (platform, value) => {
@@ -151,24 +196,15 @@ export default function ProfileEditor({ params }) {
 
                 {/* Tabs */}
                 <div className="flex border-b border-border">
-                    <button
-                        onClick={() => setActiveTab('design')}
-                        className={`flex-1 py-3 text-sm font-medium transition-colors ${activeTab === 'design' ? 'text-primary border-b-2 border-primary bg-primary/5' : 'text-muted-foreground hover:text-foreground hover:bg-accent'}`}
-                    >
-                        Design
-                    </button>
-                    <button
-                        onClick={() => setActiveTab('links')}
-                        className={`flex-1 py-3 text-sm font-medium transition-colors ${activeTab === 'links' ? 'text-primary border-b-2 border-primary bg-primary/5' : 'text-muted-foreground hover:text-foreground hover:bg-accent'}`}
-                    >
-                        Links
-                    </button>
-                    <button
-                        onClick={() => setActiveTab('socials')}
-                        className={`flex-1 py-3 text-sm font-medium transition-colors ${activeTab === 'socials' ? 'text-primary border-b-2 border-primary bg-primary/5' : 'text-muted-foreground hover:text-foreground hover:bg-accent'}`}
-                    >
-                        Socials
-                    </button>
+                    {['design', 'links', 'socials'].map(tab => (
+                        <button
+                            key={tab}
+                            onClick={() => setActiveTab(tab)}
+                            className={`flex-1 py-3 text-sm font-medium transition-colors capitalize ${activeTab === tab ? 'text-primary border-b-2 border-primary bg-primary/5' : 'text-muted-foreground hover:text-foreground hover:bg-accent'}`}
+                        >
+                            {tab}
+                        </button>
+                    ))}
                 </div>
 
                 {/* Content Scrollable */}
@@ -212,18 +248,84 @@ export default function ProfileEditor({ params }) {
                             {/* Theme */}
                             <div className="space-y-3">
                                 <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Theme</label>
-                                <div className="grid grid-cols-4 gap-2">
-                                    {['blue', 'purple', 'pink', 'light'].map(color => (
+                                <div className="grid grid-cols-5 gap-2">
+                                    {['blue', 'purple', 'pink', 'light', 'glass'].map(color => (
                                         <button
                                             key={color}
                                             onClick={() => setProfile({ ...profile, theme_color: color })}
                                             className={`h-12 rounded-xl border-2 transition-all transform hover:scale-105 ${profile.theme_color === color ? 'border-primary ring-2 ring-primary/20' : 'border-transparent opacity-70 hover:opacity-100'} ${color === 'blue' ? 'bg-[#0f172a]' :
                                                 color === 'purple' ? 'bg-[#2e1065]' :
                                                     color === 'pink' ? 'bg-[#831843]' :
-                                                        'bg-slate-100'
+                                                        color === 'glass' ? 'bg-slate-900 border-white/10 ring-1 ring-white/5' :
+                                                            'bg-slate-100'
                                                 }`}
+                                            title={color}
                                         />
                                     ))}
+                                </div>
+                            </div>
+
+                            {/* Pro Customization */}
+                            <div className="space-y-4 pt-4 border-t border-border">
+                                <div className="flex items-center justify-between">
+                                    <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-2">
+                                        <CheckCircle2 size={14} className="text-blue-500" /> Verified Badge
+                                    </label>
+                                    <button
+                                        onClick={() => setProfile({ ...profile, is_verified: !profile.is_verified })}
+                                        className={`w-10 h-5 rounded-full transition-colors relative ${profile.is_verified ? 'bg-blue-500' : 'bg-slate-700'}`}
+                                    >
+                                        <div className={`absolute top-1 w-3 h-3 rounded-full bg-white transition-all ${profile.is_verified ? 'left-6' : 'left-1'}`} />
+                                    </button>
+                                </div>
+
+                                <div className="space-y-3">
+                                    <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-2">
+                                        <Wand2 size={14} className="text-purple-500" /> Advanced Background
+                                    </label>
+
+                                    <div className="flex gap-2 p-1 bg-muted rounded-xl">
+                                        {[
+                                            { id: 'theme', icon: <Zap size={14} />, label: 'Theme' },
+                                            { id: 'color', icon: <Palette size={14} />, label: 'Solid' },
+                                            { id: 'gradient', icon: <GripVertical size={14} />, label: 'Grad' },
+                                            { id: 'animated', icon: <Loader2 size={14} />, label: 'Aurora' },
+                                        ].map(type => (
+                                            <button
+                                                key={type.id}
+                                                onClick={() => setProfile({ ...profile, bg_type: type.id })}
+                                                className={`flex-1 flex flex-col items-center py-2 rounded-lg transition-all ${profile.bg_type === type.id ? 'bg-background text-primary shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}
+                                            >
+                                                {type.icon}
+                                                <span className="text-[10px] mt-1">{type.label}</span>
+                                            </button>
+                                        ))}
+                                    </div>
+
+                                    {profile.bg_type === 'color' && (
+                                        <div className="animate-in fade-in slide-in-from-top-2">
+                                            <input
+                                                type="color"
+                                                value={profile.bg_color || '#000000'}
+                                                onChange={e => setProfile({ ...profile, bg_color: e.target.value })}
+                                                className="w-full h-10 rounded-lg cursor-pointer bg-muted border-none p-1"
+                                            />
+                                            <p className="text-[10px] text-muted-foreground mt-1 text-center font-mono uppercase">{profile.bg_color || '#000000'}</p>
+                                        </div>
+                                    )}
+
+                                    {profile.bg_type === 'gradient' && (
+                                        <div className="space-y-2 animate-in fade-in slide-in-from-top-2">
+                                            <input
+                                                type="text"
+                                                value={profile.bg_gradient || ''}
+                                                onChange={e => setProfile({ ...profile, bg_gradient: e.target.value })}
+                                                placeholder="linear-gradient(...) atau radial-gradient(...)"
+                                                className="w-full bg-muted border border-border rounded-xl p-3 text-foreground focus:border-primary outline-none transition-all text-xs font-mono"
+                                            />
+                                            <p className="text-[10px] text-muted-foreground font-medium">Contoh: linear-gradient(to right, #6366f1, #a855f7)</p>
+                                        </div>
+                                    )}
                                 </div>
                             </div>
 
@@ -241,34 +343,6 @@ export default function ProfileEditor({ params }) {
                                         </button>
                                     ))}
                                 </div>
-                            </div>
-
-                            {/* Font Family */}
-                            <div className="space-y-3">
-                                <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Font Style</label>
-                                <select
-                                    value={profile.font_family || 'sans-serif'}
-                                    onChange={e => setProfile({ ...profile, font_family: e.target.value })}
-                                    className="w-full bg-muted border border-border rounded-xl p-3 text-foreground focus:border-primary outline-none transition-all text-sm"
-                                >
-                                    <option value="sans-serif">Sans Serif</option>
-                                    <option value="serif">Serif</option>
-                                    <option value="mono">Monospace</option>
-                                    <option value="display">Modern Display</option>
-                                </select>
-                            </div>
-
-                            {/* Custom Background */}
-                            <div className="space-y-3">
-                                <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Custom Background (CSS)</label>
-                                <input
-                                    type="text"
-                                    value={profile.custom_bg || ''}
-                                    onChange={e => setProfile({ ...profile, custom_bg: e.target.value })}
-                                    placeholder="e.g. #000, linear-gradient(...)"
-                                    className="w-full bg-muted border border-border rounded-xl p-3 text-foreground focus:border-primary outline-none transition-all text-sm"
-                                />
-                                <p className="text-[10px] text-muted-foreground">Tip: Leave empty to use theme background.</p>
                             </div>
 
                             <button
@@ -312,12 +386,11 @@ export default function ProfileEditor({ params }) {
 
                     {activeTab === 'links' && (
                         <div className="space-y-6 animate-fade-in">
-                            {/* New Link Form */}
                             <form onSubmit={handleAddLink} className="bg-muted p-4 rounded-xl border border-border space-y-3">
                                 <h3 className="text-sm font-semibold text-foreground mb-2">Add New Link</h3>
                                 <input
-                                    type="url"
-                                    placeholder="URL (https://...)"
+                                    type="text"
+                                    placeholder="URL (e.g. google.com)"
                                     value={newLink.url}
                                     onChange={e => setNewLink({ ...newLink, url: e.target.value })}
                                     className="w-full bg-card border border-border rounded-lg p-2 text-foreground text-sm outline-none focus:border-primary"
@@ -334,59 +407,31 @@ export default function ProfileEditor({ params }) {
                                 </button>
                             </form>
 
-                            {/* Links List */}
-                            <div className="space-y-3">
-                                {links.map(link => (
-                                    <div key={link.id} className={`bg-card border border-border p-4 rounded-xl flex items-center gap-3 group transition-all ${link.is_active === false ? 'opacity-50' : 'opacity-100'}`}>
-                                        <GripVertical className="text-muted-foreground cursor-move" size={18} />
-                                        <div className="flex-1 min-w-0">
-                                            <p className="text-foreground text-sm font-medium truncate">{link.title}</p>
-                                            <p className="text-muted-foreground text-xs truncate">{link.original_url}</p>
-                                        </div>
-                                        <div className="flex items-center gap-3">
-                                            <div className="flex flex-col items-center gap-1">
-                                                <button
-                                                    onClick={() => handleToggleLinkActive(link.id, link.is_active)}
-                                                    className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors focus:outline-none ${link.is_active !== false ? 'bg-green-500' : 'bg-slate-600'
-                                                        }`}
-                                                    title={link.is_active !== false ? 'Active' : 'Deactivated'}
-                                                >
-                                                    <span
-                                                        className={`${link.is_active !== false ? 'translate-x-5' : 'translate-x-1'
-                                                            } inline-block h-3 w-3 transform rounded-full bg-white transition-transform`}
-                                                    />
-                                                </button>
-                                                <span className="text-[8px] text-muted-foreground uppercase font-bold tracking-tighter">Status</span>
-                                            </div>
-
-                                            <div className="flex flex-col items-center gap-1">
-                                                <button
-                                                    onClick={() => handleToggleLinkHidden(link.id, link.is_hidden)}
-                                                    className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors focus:outline-none ${link.is_hidden ? 'bg-orange-500' : 'bg-slate-700'
-                                                        }`}
-                                                    title={link.is_hidden ? 'Hidden from Bio' : 'Visible in Bio'}
-                                                >
-                                                    <span
-                                                        className={`${link.is_hidden ? 'translate-x-5' : 'translate-x-1'
-                                                            } inline-block h-3 w-3 transform rounded-full bg-white transition-transform`}
-                                                    />
-                                                </button>
-                                                <span className="text-[8px] text-muted-foreground uppercase font-bold tracking-tighter">Bio</span>
-                                            </div>
-
-                                            <button
-                                                onClick={() => handleDeleteLink(link.id)}
-                                                className="p-2 text-muted-foreground hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-colors"
-                                            >
-                                                <Trash2 size={16} />
-                                            </button>
-                                        </div>
+                            <DndContext
+                                sensors={sensors}
+                                collisionDetection={closestCenter}
+                                onDragEnd={handleDragEnd}
+                            >
+                                <SortableContext
+                                    items={links.map(l => l.id)}
+                                    strategy={verticalListSortingStrategy}
+                                >
+                                    <div className="space-y-0">
+                                        {links.map(link => (
+                                            <SortableLinkItem
+                                                key={link.id}
+                                                link={link}
+                                                onToggleActive={handleToggleLinkActive}
+                                                onToggleHidden={handleToggleLinkHidden}
+                                                onDelete={handleDeleteLink}
+                                            />
+                                        ))}
+                                        {links.length === 0 && (
+                                            <p className="text-center text-muted-foreground text-sm py-4">No links yet.</p>
+                                        )}
                                     </div>
-                                ))}
-                                {links.length === 0 && (
-                                    <p className="text-center text-muted-foreground text-sm py-4">No links yet. Add one above!</p>
-                                )}
-                            </div>
+                                </SortableContext>
+                            </DndContext>
                         </div>
                     )}
 
@@ -399,10 +444,7 @@ export default function ProfileEditor({ params }) {
 
                 {/* Mobile Frame */}
                 <div className="relative w-[340px] h-[680px] bg-black rounded-[3rem] border-8 border-slate-800 shadow-2xl overflow-hidden flex flex-col z-10 ring-4 ring-black/20">
-                    {/* Notch */}
                     <div className="absolute top-0 left-1/2 -translate-x-1/2 w-40 h-7 bg-slate-800 rounded-b-2xl z-20"></div>
-
-                    {/* Screen Content */}
                     <div className="flex-1 overflow-y-auto scrollbar-hide bg-slate-900">
                         <BioTemplate profile={profile} links={links.filter(l => l.is_active !== false)} />
                     </div>

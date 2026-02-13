@@ -1,16 +1,26 @@
 import { createClient } from '@/lib/supabaseServer'
 import { redirect } from 'next/navigation'
+import { headers } from 'next/headers'
 
 export const dynamic = 'force-dynamic'
 
 export async function GET(request, { params }) {
     const { slug } = await params
-    console.log('Redirecting slug:', slug) // Debug log
+    const headerList = await headers()
+    const userAgent = headerList.get('user-agent') || 'unknown'
+    const referrer = headerList.get('referer') || 'direct'
+
+    // Attempt to get country from Vercel headers if available
+    const country = headerList.get('x-vercel-ip-country') || 'unknown'
+
+    // Simple device detection
+    const isMobile = /mobile/i.test(userAgent)
+    const deviceType = isMobile ? 'mobile' : 'desktop'
 
     const supabase = await createClient()
     const { data, error } = await supabase
         .from('links')
-        .select('original_url, is_active')
+        .select('id, profile_id, original_url, is_active')
         .eq('slug', slug)
         .maybeSingle()
 
@@ -28,6 +38,18 @@ export async function GET(request, { params }) {
                 </html>
             `, { headers: { 'Content-Type': 'text/html' } })
         }
+
+        // Record the click (fire and forget for better performance, though Supabase is fast)
+        // We use the service role or a public insert policy
+        await supabase.from('clicks').insert({
+            link_id: data.id,
+            profile_id: data.profile_id,
+            user_agent: userAgent,
+            referrer: referrer,
+            country: country,
+            device_type: deviceType
+        })
+
         redirect(data.original_url)
     } else {
         return new Response('Link not found', { status: 404 })
