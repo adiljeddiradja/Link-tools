@@ -60,7 +60,7 @@ export default function Sidebar() {
                     <X size={24} />
                 </button>
                 <div className="p-6 flex items-center justify-between">
-                    <h1 className="text-xl font-bold bg-gradient-to-r from-blue-500 to-purple-600 bg-clip-text text-transparent">LinkManager</h1>
+                    <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-500 to-purple-600 bg-clip-text text-transparent">Linkiez</h1>
                     <ThemeToggle />
                 </div>
                 <nav className="flex-1 px-4 space-y-2">

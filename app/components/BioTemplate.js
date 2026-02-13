@@ -140,7 +140,7 @@ export default function BioTemplate({ profile, links }) {
             <footer className={`mt-16 text-[10px] flex flex-col items-center gap-2 ${profile.theme_color === 'light' ? 'text-slate-400' : 'text-slate-600'} uppercase tracking-[0.2em] font-bold opacity-60`}>
                 <div className={`w-8 h-0.5 ${profile.theme_color === 'light' ? 'bg-slate-200' : 'bg-slate-800'}`} />
                 <p>Credit by A Deel</p>
-                <p className="opacity-30">Powered by LinkManager</p>
+                <p className="opacity-30">Powered by Linkiez</p>
             </footer>
 
             <style>{`

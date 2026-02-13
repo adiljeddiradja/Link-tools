@@ -5,7 +5,7 @@ import "./globals.css";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata = {
-  title: "Link Management",
+  title: "Linkiez",
   description: "All-in-one link management tool",
 };
 
