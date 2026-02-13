@@ -14,7 +14,7 @@ export default function ProfileEditor({ params }) {
     const [links, setLinks] = useState([])
     const [loading, setLoading] = useState(true)
     const [saving, setSaving] = useState(false)
-    const [activeTab, setActiveTab] = useState('design') // design, links
+    const [activeTab, setActiveTab] = useState('design') // design, links, socials
     const [newLink, setNewLink] = useState({ title: '', url: '' })
 
     // Fetch initial data
@@ -57,7 +57,10 @@ export default function ProfileEditor({ params }) {
             bio: profile.bio,
             theme_color: profile.theme_color,
             button_style: profile.button_style,
-            avatar_url: profile.avatar_url
+            avatar_url: profile.avatar_url,
+            social_links: profile.social_links,
+            font_family: profile.font_family,
+            custom_bg: profile.custom_bg
         }).eq('id', id)
         setSaving(false)
     }
@@ -100,6 +103,28 @@ export default function ProfileEditor({ params }) {
         }
     }
 
+    const handleToggleLinkHidden = async (linkId, currentStatus) => {
+        const newStatus = currentStatus === true ? false : true
+        const { error } = await supabase
+            .from('links')
+            .update({ is_hidden: newStatus })
+            .eq('id', linkId)
+
+        if (!error) {
+            setLinks(links.map(l => l.id === linkId ? { ...l, is_hidden: newStatus } : l))
+        }
+    }
+
+    const updateSocialLink = (platform, value) => {
+        setProfile({
+            ...profile,
+            social_links: {
+                ...(profile.social_links || {}),
+                [platform]: value
+            }
+        })
+    }
+
     if (loading) return <div className="min-h-screen bg-slate-950 flex items-center justify-center text-white"><Loader2 className="animate-spin mr-2" /> Loading Editor...</div>
     if (!profile) return <div className="text-white">Profile not found</div>
 
@@ -129,6 +154,12 @@ export default function ProfileEditor({ params }) {
                         className={`flex-1 py-3 text-sm font-medium transition-colors ${activeTab === 'links' ? 'text-primary border-b-2 border-primary bg-primary/5' : 'text-muted-foreground hover:text-foreground hover:bg-accent'}`}
                     >
                         Links
+                    </button>
+                    <button
+                        onClick={() => setActiveTab('socials')}
+                        className={`flex-1 py-3 text-sm font-medium transition-colors ${activeTab === 'socials' ? 'text-primary border-b-2 border-primary bg-primary/5' : 'text-muted-foreground hover:text-foreground hover:bg-accent'}`}
+                    >
+                        Socials
                     </button>
                 </div>
 
@@ -197,6 +228,34 @@ export default function ProfileEditor({ params }) {
                                 </div>
                             </div>
 
+                            {/* Font Family */}
+                            <div className="space-y-3">
+                                <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Font Style</label>
+                                <select
+                                    value={profile.font_family || 'sans-serif'}
+                                    onChange={e => setProfile({ ...profile, font_family: e.target.value })}
+                                    className="w-full bg-muted border border-border rounded-xl p-3 text-foreground focus:border-primary outline-none transition-all text-sm"
+                                >
+                                    <option value="sans-serif">Sans Serif</option>
+                                    <option value="serif">Serif</option>
+                                    <option value="mono">Monospace</option>
+                                    <option value="display">Modern Display</option>
+                                </select>
+                            </div>
+
+                            {/* Custom Background */}
+                            <div className="space-y-3">
+                                <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Custom Background (CSS)</label>
+                                <input
+                                    type="text"
+                                    value={profile.custom_bg || ''}
+                                    onChange={e => setProfile({ ...profile, custom_bg: e.target.value })}
+                                    placeholder="e.g. #000, linear-gradient(...)"
+                                    className="w-full bg-muted border border-border rounded-xl p-3 text-foreground focus:border-primary outline-none transition-all text-sm"
+                                />
+                                <p className="text-[10px] text-muted-foreground">Tip: Leave empty to use theme background.</p>
+                            </div>
+
                             <button
                                 onClick={handleSaveProfile}
                                 disabled={saving}
@@ -204,6 +263,34 @@ export default function ProfileEditor({ params }) {
                             >
                                 {saving ? <Loader2 className="animate-spin" /> : <Save size={18} />}
                                 Save Changes
+                            </button>
+                        </div>
+                    )}
+
+                    {activeTab === 'socials' && (
+                        <div className="space-y-6 animate-fade-in text-foreground">
+                            <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Social Media Links</label>
+                            <div className="space-y-4">
+                                {['instagram', 'twitter', 'github', 'linkedin', 'mail'].map(social => (
+                                    <div key={social} className="space-y-1">
+                                        <label className="text-[10px] font-medium text-muted-foreground capitalize">{social}</label>
+                                        <input
+                                            type="text"
+                                            value={(profile.social_links && profile.social_links[social]) || ''}
+                                            onChange={e => updateSocialLink(social, e.target.value)}
+                                            placeholder={`Your ${social} link/username`}
+                                            className="w-full bg-muted border border-border rounded-xl p-3 text-foreground focus:border-primary outline-none transition-all text-sm"
+                                        />
+                                    </div>
+                                ))}
+                            </div>
+                            <button
+                                onClick={handleSaveProfile}
+                                disabled={saving}
+                                className="w-full bg-primary hover:bg-blue-600 text-primary-foreground font-bold py-3 rounded-xl shadow-lg shadow-blue-500/20 flex items-center justify-center gap-2 transition-all active:scale-95 disabled:opacity-70"
+                            >
+                                {saving ? <Loader2 className="animate-spin" /> : <Save size={18} />}
+                                Save Socials
                             </button>
                         </div>
                     )}
@@ -241,17 +328,37 @@ export default function ProfileEditor({ params }) {
                                             <p className="text-foreground text-sm font-medium truncate">{link.title}</p>
                                             <p className="text-muted-foreground text-xs truncate">{link.original_url}</p>
                                         </div>
-                                        <div className="flex items-center gap-2">
-                                            <button
-                                                onClick={() => handleToggleLinkActive(link.id, link.is_active)}
-                                                className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors focus:outline-none ${link.is_active !== false ? 'bg-green-500' : 'bg-slate-600'
-                                                    }`}
-                                            >
-                                                <span
-                                                    className={`${link.is_active !== false ? 'translate-x-5' : 'translate-x-1'
-                                                        } inline-block h-3 w-3 transform rounded-full bg-white transition-transform`}
-                                                />
-                                            </button>
+                                        <div className="flex items-center gap-3">
+                                            <div className="flex flex-col items-center gap-1">
+                                                <button
+                                                    onClick={() => handleToggleLinkActive(link.id, link.is_active)}
+                                                    className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors focus:outline-none ${link.is_active !== false ? 'bg-green-500' : 'bg-slate-600'
+                                                        }`}
+                                                    title={link.is_active !== false ? 'Active' : 'Deactivated'}
+                                                >
+                                                    <span
+                                                        className={`${link.is_active !== false ? 'translate-x-5' : 'translate-x-1'
+                                                            } inline-block h-3 w-3 transform rounded-full bg-white transition-transform`}
+                                                    />
+                                                </button>
+                                                <span className="text-[8px] text-muted-foreground uppercase font-bold tracking-tighter">Status</span>
+                                            </div>
+
+                                            <div className="flex flex-col items-center gap-1">
+                                                <button
+                                                    onClick={() => handleToggleLinkHidden(link.id, link.is_hidden)}
+                                                    className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors focus:outline-none ${link.is_hidden ? 'bg-orange-500' : 'bg-slate-700'
+                                                        }`}
+                                                    title={link.is_hidden ? 'Hidden from Bio' : 'Visible in Bio'}
+                                                >
+                                                    <span
+                                                        className={`${link.is_hidden ? 'translate-x-5' : 'translate-x-1'
+                                                            } inline-block h-3 w-3 transform rounded-full bg-white transition-transform`}
+                                                    />
+                                                </button>
+                                                <span className="text-[8px] text-muted-foreground uppercase font-bold tracking-tighter">Bio</span>
+                                            </div>
+
                                             <button
                                                 onClick={() => handleDeleteLink(link.id)}
                                                 className="p-2 text-muted-foreground hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-colors"

@@ -98,6 +98,20 @@ export default function Dashboard() {
     }
   }
 
+  const handleToggleHidden = async (id, currentStatus) => {
+    const newStatus = currentStatus === true ? false : true
+    const { error } = await supabase
+      .from('links')
+      .update({ is_hidden: newStatus })
+      .eq('id', id)
+
+    if (!error) {
+      setLinks(links.map(link => link.id === id ? { ...link, is_hidden: newStatus } : link))
+    } else {
+      alert('Error updating bio visibility: ' + error.message)
+    }
+  }
+
   const handleDelete = async (id) => {
     const { error } = await supabase.from('links').delete().eq('id', id)
     if (!error) {
@@ -297,18 +311,37 @@ export default function Dashboard() {
 
                 <div className="flex flex-wrap items-center gap-2 self-end sm:self-center bg-muted/20 p-2 rounded-xl border border-border/50">
                   <div className="flex items-center gap-2 pr-2 border-r border-border/50 mr-1">
-                    <button
-                      onClick={() => handleToggleActive(link.id, link.is_active)}
-                      className={`relative inline-flex h-5 w-9 flex-shrink-0 items-center rounded-full transition-colors focus:outline-none ${link.is_active !== false ? 'bg-green-500' : 'bg-slate-600'
-                        }`}
-                      title={link.is_active !== false ? 'Link is Active' : 'Link is Paused'}
-                    >
-                      <span
-                        className={`${link.is_active !== false ? 'translate-x-5' : 'translate-x-1'
-                          } inline-block h-3 w-3 transform rounded-full bg-white transition-transform`}
-                      />
-                    </button>
-                    <div className="p-1.5 bg-white rounded-md border border-gray-100 shadow-sm flex-shrink-0">
+                    <div className="flex flex-col items-center gap-1">
+                      <button
+                        onClick={() => handleToggleActive(link.id, link.is_active)}
+                        className={`relative inline-flex h-5 w-9 flex-shrink-0 items-center rounded-full transition-colors focus:outline-none ${link.is_active !== false ? 'bg-green-500' : 'bg-slate-600'
+                          }`}
+                        title={link.is_active !== false ? 'Shortlink is Active' : 'Shortlink is Paused'}
+                      >
+                        <span
+                          className={`${link.is_active !== false ? 'translate-x-5' : 'translate-x-1'
+                            } inline-block h-3 w-3 transform rounded-full bg-white transition-transform`}
+                        />
+                      </button>
+                      <span className="text-[8px] text-muted-foreground uppercase font-bold tracking-tighter">Status</span>
+                    </div>
+
+                    <div className="flex flex-col items-center gap-1">
+                      <button
+                        onClick={() => handleToggleHidden(link.id, link.is_hidden)}
+                        className={`relative inline-flex h-5 w-9 flex-shrink-0 items-center rounded-full transition-colors focus:outline-none ${link.is_hidden ? 'bg-orange-500' : 'bg-slate-700'
+                          }`}
+                        title={link.is_hidden ? 'Hidden from Bio Page' : 'Visible in Bio Page'}
+                      >
+                        <span
+                          className={`${link.is_hidden ? 'translate-x-5' : 'translate-x-1'
+                            } inline-block h-3 w-3 transform rounded-full bg-white transition-transform`}
+                        />
+                      </button>
+                      <span className="text-[8px] text-muted-foreground uppercase font-bold tracking-tighter">Bio</span>
+                    </div>
+
+                    <div className="p-1.5 bg-white rounded-md border border-gray-100 shadow-sm flex-shrink-0 ml-1">
                       <QRCodeCanvas
                         id={`qr-${link.slug}`}
                         value={`${baseUrl}/${link.slug}`}

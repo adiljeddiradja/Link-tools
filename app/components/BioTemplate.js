@@ -16,13 +16,38 @@ export default function BioTemplate({ profile, links }) {
     const buttonStyle = profile.button_style === 'rounded-full' ? 'rounded-full' :
         profile.button_style === 'sharp' ? 'rounded-none' : 'rounded-2xl'
 
+    const fontStyles = {
+        'sans-serif': 'font-sans',
+        'serif': 'font-serif',
+        'mono': 'font-mono',
+        'display': 'font-display', // Assuming custom font classes or default ones
+    }
+    const currentFont = fontStyles[profile.font_family] || 'font-sans'
+
+    // Social Links mapping
+    const socialIcons = {
+        instagram: <Instagram size={20} />,
+        twitter: <Twitter size={20} />,
+        github: <Github size={20} />,
+        linkedin: <Linkedin size={20} />,
+        globe: <Globe size={20} />,
+        mail: <Mail size={20} />
+    }
+
     const initials = profile.display_name ? profile.display_name.slice(0, 2).toUpperCase() : '??'
 
     return (
-        <div className={`min-h-screen flex flex-col items-center py-16 px-4 ${currentTheme.bg} ${currentTheme.text} relative overflow-hidden transition-colors duration-500`}>
-            {/* Background Ambience */}
-            <div className={`absolute top-0 left-1/4 w-96 h-96 ${profile.theme_color === 'light' ? 'bg-blue-200/50' : 'bg-purple-600/20'} rounded-full blur-[128px] pointer-events-none`} />
-            <div className={`absolute bottom-0 right-1/4 w-96 h-96 ${profile.theme_color === 'light' ? 'bg-purple-200/50' : 'bg-blue-600/20'} rounded-full blur-[128px] pointer-events-none`} />
+        <div
+            className={`min-h-screen flex flex-col items-center py-16 px-4 ${!profile.custom_bg ? currentTheme.bg : ''} ${currentTheme.text} ${currentFont} relative overflow-hidden transition-colors duration-500`}
+            style={profile.custom_bg ? { background: profile.custom_bg } : {}}
+        >
+            {/* Background Ambience (only show if using default themes) */}
+            {!profile.custom_bg && (
+                <>
+                    <div className={`absolute top-0 left-1/4 w-96 h-96 ${profile.theme_color === 'light' ? 'bg-blue-200/50' : 'bg-purple-600/20'} rounded-full blur-[128px] pointer-events-none`} />
+                    <div className={`absolute bottom-0 right-1/4 w-96 h-96 ${profile.theme_color === 'light' ? 'bg-purple-200/50' : 'bg-blue-600/20'} rounded-full blur-[128px] pointer-events-none`} />
+                </>
+            )}
 
             {/* Profile Header */}
             <div className="flex flex-col items-center mb-10 space-y-6 relative z-10 animate-fade-in-up w-full max-w-md">
@@ -46,17 +71,31 @@ export default function BioTemplate({ profile, links }) {
                     </p>
                 </div>
 
-                {/* Social Icons Mockup (Static for now, could be dynamic later) */}
-                <div className={`flex gap-4 ${profile.theme_color === 'light' ? 'text-slate-400' : 'text-slate-500'}`}>
-                    <div className={`p-2 rounded-full transition-colors cursor-pointer hover:${currentTheme.accent}`}><Mail size={20} /></div>
-                    <div className={`p-2 rounded-full transition-colors cursor-pointer hover:${currentTheme.accent}`}><Globe size={20} /></div>
-                </div>
+                {/* Social Icons */}
+                {profile.social_links && Object.keys(profile.social_links).length > 0 && (
+                    <div className={`flex flex-wrap justify-center gap-4 ${profile.theme_color === 'light' ? 'text-slate-500' : 'text-slate-300'}`}>
+                        {Object.entries(profile.social_links).map(([platform, url]) => (
+                            url && (
+                                <a
+                                    key={platform}
+                                    href={url.startsWith('http') ? url : `https://${url}`}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className={`p-2.5 rounded-full bg-white/5 border border-white/5 backdrop-blur-sm transition-all hover:scale-110 hover:${currentTheme.accent} hover:border-white/20 shadow-lg`}
+                                    title={platform}
+                                >
+                                    {socialIcons[platform] || <Globe size={20} />}
+                                </a>
+                            )
+                        ))}
+                    </div>
+                )}
             </div>
 
             {/* Links Stack */}
             <div className="w-full max-w-md space-y-4 relative z-10 perspective-1000">
-                {links && links.length > 0 ? (
-                    links.map((link, index) => (
+                {links && links.filter(l => l.is_hidden !== true).length > 0 ? (
+                    links.filter(l => l.is_hidden !== true).map((link, index) => (
                         <a
                             key={link.id}
                             href={link.original_url}
