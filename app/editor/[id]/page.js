@@ -52,7 +52,7 @@ export default function ProfileEditor({ params }) {
 
     const handleSaveProfile = async () => {
         setSaving(true)
-        await supabase.from('profiles').update({
+        const { error } = await supabase.from('profiles').update({
             display_name: profile.display_name,
             bio: profile.bio,
             theme_color: profile.theme_color,
@@ -63,6 +63,13 @@ export default function ProfileEditor({ params }) {
             font_family: profile.font_family,
             custom_bg: profile.custom_bg
         }).eq('id', id)
+
+        if (error) {
+            alert("Error saving profiles: " + error.message)
+            console.error("Save error:", error)
+        } else {
+            alert("Changes saved successfully!")
+        }
         setSaving(false)
     }
 
