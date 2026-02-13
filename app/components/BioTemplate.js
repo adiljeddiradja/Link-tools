@@ -41,19 +41,20 @@ export default function BioTemplate({ profile, links }) {
             className={`min-h-screen flex flex-col items-center py-16 px-4 ${!profile.custom_bg ? currentTheme.bg : ''} ${currentTheme.text} ${currentFont} relative overflow-hidden transition-colors duration-500`}
             style={profile.custom_bg ? { background: profile.custom_bg } : {}}
         >
-            {/* Banner Section */}
+            {/* Banner Section (Facebook-style Cover) */}
             {profile.banner_url && (
-                <div className="absolute top-0 left-0 w-full h-48 md:h-64 z-0">
+                <div className="absolute top-0 left-0 w-full h-56 md:h-72 z-0">
                     <img
                         src={profile.banner_url}
                         alt="Banner"
-                        className="w-full h-full object-cover opacity-60"
+                        className="w-full h-full object-cover"
                     />
-                    <div className={`absolute inset-0 bg-gradient-to-b from-transparent ${!profile.custom_bg ? currentTheme.bg : 'to-transparent'}`} />
+                    <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-black/40" />
                 </div>
             )}
-            {/* Background Ambience (only show if using default themes) */}
-            {!profile.custom_bg && (
+
+            {/* Background Ambience (only show if using default themes and NO banner) */}
+            {!profile.custom_bg && !profile.banner_url && (
                 <>
                     <div className={`absolute top-0 left-1/4 w-96 h-96 ${profile.theme_color === 'light' ? 'bg-blue-200/50' : 'bg-purple-600/20'} rounded-full blur-[128px] pointer-events-none`} />
                     <div className={`absolute bottom-0 right-1/4 w-96 h-96 ${profile.theme_color === 'light' ? 'bg-purple-200/50' : 'bg-blue-600/20'} rounded-full blur-[128px] pointer-events-none`} />
@@ -61,14 +62,15 @@ export default function BioTemplate({ profile, links }) {
             )}
 
             {/* Profile Header */}
-            <div className={`flex flex-col items-center mb-10 space-y-6 relative z-10 animate-fade-in-up w-full max-w-md ${profile.banner_url ? 'mt-32' : ''}`}>
-                <div className="relative group cursor-pointer transform hover:scale-105 transition-transform duration-300">
-                    <div className={`absolute -inset-1 bg-gradient-to-r ${profile.theme_color === 'light' ? 'from-blue-400 to-purple-400' : 'from-pink-600 to-purple-600'} rounded-full blur opacity-75 group-hover:opacity-100 transition duration-1000 group-hover:duration-200`}></div>
-                    <div className={`relative w-28 h-28 rounded-full ${profile.theme_color === 'light' ? 'bg-white' : 'bg-slate-900'} border-4 ${profile.theme_color === 'light' ? 'border-slate-100' : 'border-slate-800'} flex items-center justify-center text-4xl font-bold overflow-hidden shadow-2xl`}>
+            <div className={`flex flex-col items-center mb-8 space-y-4 relative z-10 animate-fade-in-up w-full max-w-md ${profile.banner_url ? 'mt-36' : ''}`}>
+                <div className="relative group transform hover:scale-105 transition-transform duration-300">
+                    {/* Ring for Overlap Effect */}
+                    <div className={`absolute -inset-1 blur-sm opacity-50 ${profile.theme_color === 'light' ? 'bg-slate-200' : 'bg-slate-800'} rounded-full`}></div>
+                    <div className={`relative w-32 h-32 rounded-full border-[6px] ${profile.theme_color === 'light' ? 'border-white' : 'border-[#0f172a]'} shadow-2xl overflow-hidden flex items-center justify-center bg-muted`}>
                         {profile.avatar_url ? (
                             <img src={profile.avatar_url} alt={profile.display_name} className="w-full h-full object-cover" />
                         ) : (
-                            <span className="bg-gradient-to-br from-blue-400 to-purple-600 bg-clip-text text-transparent">
+                            <span className="text-4xl font-bold bg-gradient-to-br from-blue-400 to-purple-600 bg-clip-text text-transparent">
                                 {initials}
                             </span>
                         )}
