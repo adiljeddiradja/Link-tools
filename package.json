@@ -2,11 +2,14 @@
   "name": "link-tool",
   "version": "0.1.0",
   "private": true,
+  "type": "module",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "test": "node tests/validators.test.js",
+    "test:security": "node tests/security-headers.test.js && node tests/penetration-test-rate-limit.js"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",

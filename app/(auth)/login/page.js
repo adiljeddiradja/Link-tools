@@ -21,8 +21,25 @@ export default function LoginPage() {
         setError(null)
 
         try {
+            // ✅ SECURITY: Check rate limit before attempting login
+            const rateLimitResponse = await fetch('/api/rate-limit', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: 'login' })
+            })
+
+            const rateLimitData = await rateLimitResponse.json()
+
+            if (!rateLimitData.allowed) {
+                throw new Error(
+                    rateLimitData.message ||
+                    'Too many login attempts. Please try again later.'
+                )
+            }
+
+            // Proceed with login
             const { data, error } = await supabase.auth.signInWithPassword({
-                email,
+                email: email.trim(),
                 password,
             })
 
