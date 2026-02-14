@@ -1,0 +1,17 @@
+{
+    "name": "Linkiez",
+    "short_name": "Linkiez",
+    "description": "Smart link management for creators",
+    "start_url": "/",
+    "display": "standalone",
+    "background_color": "#ffffff",
+    "theme_color": "#8B5CF6",
+    "icons": [
+        {
+            "src": "/icon.svg",
+            "sizes": "any",
+            "type": "image/svg+xml",
+            "purpose": "any maskable"
+        }
+    ]
+}
