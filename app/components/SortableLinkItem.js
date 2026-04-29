@@ -45,13 +45,11 @@ export function SortableLinkItem({ link, onToggleActive, onToggleHidden, onDelet
                 <div className="flex flex-col items-center gap-1">
                     <button
                         onClick={() => onToggleActive(link.id, link.is_active)}
-                        className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors focus:outline-none ${link.is_active !== false ? 'bg-green-500' : 'bg-slate-600'
-                            }`}
-                        title={link.is_active !== false ? 'Active' : 'Deactivated'}
+                        className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors focus:outline-none ${link.is_active === false ? 'bg-slate-600' : 'bg-green-500'}`}
+                        title={link.is_active === false ? 'Deactivated' : 'Active'}
                     >
                         <span
-                            className={`${link.is_active !== false ? 'translate-x-5' : 'translate-x-1'
-                                } inline-block h-3 w-3 transform rounded-full bg-white transition-transform`}
+                            className={`${link.is_active === false ? 'translate-x-1' : 'translate-x-5'} inline-block h-3 w-3 transform rounded-full bg-white transition-transform`}
                         />
                     </button>
                     <span className="text-[8px] text-muted-foreground uppercase font-bold tracking-tighter">Status</span>
@@ -60,13 +58,11 @@ export function SortableLinkItem({ link, onToggleActive, onToggleHidden, onDelet
                 <div className="flex flex-col items-center gap-1">
                     <button
                         onClick={() => onToggleHidden(link.id, link.is_hidden)}
-                        className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors focus:outline-none ${link.is_hidden ? 'bg-orange-500' : 'bg-slate-700'
-                            }`}
+                        className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors focus:outline-none ${link.is_hidden ? 'bg-orange-500' : 'bg-slate-700'}`}
                         title={link.is_hidden ? 'Hidden from Bio' : 'Visible in Bio'}
                     >
                         <span
-                            className={`${link.is_hidden ? 'translate-x-5' : 'translate-x-1'
-                                } inline-block h-3 w-3 transform rounded-full bg-white transition-transform`}
+                            className={`${link.is_hidden ? 'translate-x-5' : 'translate-x-1'} inline-block h-3 w-3 transform rounded-full bg-white transition-transform`}
                         />
                     </button>
                     <span className="text-[8px] text-muted-foreground uppercase font-bold tracking-tighter">Bio</span>

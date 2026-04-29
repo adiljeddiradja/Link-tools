@@ -15,7 +15,7 @@ export default function BioTemplate({ profile, links }) {
         pink: { bg: 'bg-[#831843]', accent: 'text-pink-400', button: 'bg-white/10 border-white/10 hover:border-pink-400/50', text: 'text-white' },
         light: { bg: 'bg-slate-50', accent: 'text-blue-600', button: 'bg-white border-slate-200 hover:border-blue-400 shadow-sm', text: 'text-slate-900' },
         glass: { bg: 'bg-slate-950', accent: 'text-cyan-400', button: 'bg-white/5 border-white/10 hover:border-white/20 hover:bg-white/10 backdrop-blur-xl', text: 'text-white' },
-        lilac: { bg: 'bg-[#faf5ff]', accent: 'text-purple-600', button: 'bg-white/60 backdrop-blur-md border-purple-100 hover:border-purple-300 shadow-sm', text: 'text-slate-800' },
+        lilac: { bg: 'bg-purple-50', accent: 'text-purple-600', button: 'bg-white/80 backdrop-blur-md border-purple-200 hover:border-purple-400 shadow-sm', text: 'text-purple-900' },
     }
 
     const currentTheme = themes[profile.theme_color] || themes.blue
@@ -52,6 +52,7 @@ export default function BioTemplate({ profile, links }) {
             backgroundSize: '400% 400%',
         }
         if (profile.custom_bg) return { background: profile.custom_bg }
+        if (profile.theme_color === 'lilac') return { backgroundColor: '#f5f3ff' } // Extra safety for Lilac
         return {}
     }
 

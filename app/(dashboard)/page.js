@@ -43,7 +43,7 @@ export default function Dashboard() {
       .select('handle')
       .eq('user_id', uid)
       .limit(1)
-      .single()
+      .maybeSingle()
 
     if (data) setPrimaryHandle(data.handle)
   }
@@ -63,24 +63,26 @@ export default function Dashboard() {
   }
 
   const fetchTotalClicks = async (uid) => {
-    // Fetch total clicks for all links belonging to the user
-    const { count, error } = await supabase
-      .from('clicks')
-      .select('*', { count: 'exact', head: true })
-      .in('link_id', links.map(l => l.id))
+    // Fetch all link IDs for the user in one go
+    const { data: userLinks, error: linksError } = await supabase
+      .from('links')
+      .select('id')
+      .eq('user_id', uid)
 
-    // Note: This might be inaccurate if 'links' hasn't loaded yet.
-    // Better way: fetch by profile_id or join.
-    // For now, let's fetch all clicks for links where user_id = uid via profile/link hierarchy
-    const { data: userLinks } = await supabase.from('links').select('id').eq('user_id', uid)
+    if (linksError || !userLinks || userLinks.length === 0) {
+      setTotalClicks(0)
+      return
+    }
+
     const linkIds = userLinks.map(l => l.id)
 
-    if (linkIds.length > 0) {
-      const { count: clickCount } = await supabase
-        .from('clicks')
-        .select('*', { count: 'exact', head: true })
-        .in('link_id', linkIds)
+    // Count total clicks for these link IDs
+    const { count: clickCount, error: clicksError } = await supabase
+      .from('clicks')
+      .select('*', { count: 'exact', head: true })
+      .in('link_id', linkIds)
 
+    if (!clicksError) {
       setTotalClicks(clickCount || 0)
     }
   }

@@ -52,14 +52,12 @@ const nextConfig = {
             key: 'X-XSS-Protection',
             value: '1; mode=block'
           },
-          {
-            // Strict Transport Security (HTTPS only) - only in production
-            ...(process.env.NODE_ENV === 'production' && {
-              key: 'Strict-Transport-Security',
-              value: 'max-age=31536000; includeSubDomains'
-            })
-          }
-        ].filter(Boolean) // Remove undefined entries
+          // Strict Transport Security (HTTPS only) - only in production
+          ...(process.env.NODE_ENV === 'production' ? [{
+            key: 'Strict-Transport-Security',
+            value: 'max-age=31536000; includeSubDomains'
+          }] : [])
+        ]
       }
     ];
   }

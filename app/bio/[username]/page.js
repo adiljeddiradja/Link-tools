@@ -49,7 +49,7 @@ export default async function BioPage({ params }) {
         .from('links')
         .select('*')
         .eq('profile_id', profile.id)
-        .neq('is_active', false)
+        .or('is_active.eq.true,is_active.is.null') // Include true or null (default is true)
         .order('created_at', { ascending: false })
 
     return (

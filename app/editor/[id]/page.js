@@ -257,7 +257,7 @@ export default function ProfileEditor({ params }) {
                                                 color === 'purple' ? 'bg-[#2e1065]' :
                                                     color === 'pink' ? 'bg-[#831843]' :
                                                         color === 'glass' ? 'bg-slate-900 border-white/10 ring-1 ring-white/5' :
-                                                            color === 'lilac' ? 'bg-[#f5f3ff] border-[#e9d5ff]' :
+                                                            color === 'lilac' ? 'bg-purple-100 border-purple-300' :
                                                                 'bg-slate-100'
                                                 }`}
                                             title={color}
