@@ -27,7 +27,7 @@ export async function generateMetadata({ params }) {
             title,
             description,
             images: profile.avatar_url ? [profile.avatar_url] : [],
-            url: `https://linkiez.app/bio/${profile.handle}`,
+            url: `https://linkiez.vercel.app/bio/${profile.handle}`,
         },
         twitter: {
             card: 'summary_large_image',
@@ -95,7 +95,7 @@ export default async function BioPage({ params }) {
             'description': profile.bio,
             'image': profile.avatar_url,
             'identifier': profile.handle,
-            'url': `https://linkiez.app/bio/${profile.handle}`
+            'url': `https://linkiez.vercel.app/bio/${profile.handle}`
         }
     }
 

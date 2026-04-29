@@ -18,7 +18,7 @@ export const metadata = {
   openGraph: {
     type: 'website',
     locale: 'en_US',
-    url: 'https://linkiez.app',
+    url: 'https://linkiez.vercel.app',
     title: 'Linkiez - Smart Link Management',
     description: 'Create beautiful bio pages, shorten links, and track analytics.',
     siteName: 'Linkiez',

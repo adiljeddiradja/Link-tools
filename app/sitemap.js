@@ -1,6 +1,6 @@
 
 export default async function sitemap() {
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://linkiez.app';
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://linkiez.vercel.app';
 
     // Core static pages
     const routes = ['', '/login', '/signup'].map((route) => ({

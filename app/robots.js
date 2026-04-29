@@ -1,5 +1,5 @@
 export default function robots() {
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://linkiez.app';
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://linkiez.vercel.app';
 
     return {
         rules: {
