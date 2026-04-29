@@ -57,7 +57,7 @@ export default function BioTemplate({ profile, links }) {
     }
 
     return (
-        <div
+        <main
             className={`min-h-screen flex flex-col items-center py-16 px-4 ${(!profile.bg_type || profile.bg_type === 'theme') && !profile.custom_bg ? currentTheme.bg : ''} ${currentTheme.text} ${currentFont} relative overflow-hidden transition-all duration-700 ${profile.bg_type === 'animated' ? 'animate-aurora' : ''}`}
             style={getBackgroundStyles()}
         >
@@ -212,6 +212,6 @@ export default function BioTemplate({ profile, links }) {
                 <div className={`w-12 h-0.5 ${profile.theme_color === 'light' ? 'bg-slate-200' : 'bg-slate-800'}`} />
                 <p>Created by A Deel</p>
             </footer>
-        </div>
+        </main>
     )
 }

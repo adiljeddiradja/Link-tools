@@ -5,6 +5,39 @@ import { Layout } from 'lucide-react'
 // Force dynamic rendering since we are fetching data that might change
 export const dynamic = 'force-dynamic'
 
+// Dynamic Metadata for SEO
+export async function generateMetadata({ params }) {
+    const { username } = await params
+    const supabase = await createClient()
+    const { data: profile } = await supabase
+        .from('profiles')
+        .select('display_name, bio, handle, avatar_url')
+        .eq('handle', username)
+        .maybeSingle()
+
+    if (!profile) return { title: 'Profile Not Found' }
+
+    const title = `${profile.display_name || profile.handle} (@${profile.handle}) | Linkiez`
+    const description = profile.bio || `Check out ${profile.display_name || profile.handle}'s links on Linkiez.`
+
+    return {
+        title,
+        description,
+        openGraph: {
+            title,
+            description,
+            images: profile.avatar_url ? [profile.avatar_url] : [],
+            url: `https://linkiez.app/bio/${profile.handle}`,
+        },
+        twitter: {
+            card: 'summary_large_image',
+            title,
+            description,
+            images: profile.avatar_url ? [profile.avatar_url] : [],
+        }
+    }
+}
+
 export default async function BioPage({ params }) {
     const { username } = await params // 'username' here matches the folder [username], but we treat it as 'handle' now
 
@@ -52,7 +85,27 @@ export default async function BioPage({ params }) {
         .or('is_active.eq.true,is_active.is.null') // Include true or null (default is true)
         .order('created_at', { ascending: false })
 
+    // JSON-LD Structured Data
+    const jsonLd = {
+        '@context': 'https://schema.org',
+        '@type': 'ProfilePage',
+        'mainEntity': {
+            '@type': 'Person',
+            'name': profile.display_name,
+            'description': profile.bio,
+            'image': profile.avatar_url,
+            'identifier': profile.handle,
+            'url': `https://linkiez.app/bio/${profile.handle}`
+        }
+    }
+
     return (
-        <BioTemplate profile={profile} links={links || []} />
+        <>
+            <script
+                type="application/ld+json"
+                dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+            />
+            <BioTemplate profile={profile} links={links || []} />
+        </>
     )
 }
