@@ -1,12 +1,47 @@
 'use client'
 
-import { ExternalLink, Github, Twitter, Instagram, Linkedin, Globe, Mail, CheckCircle2 } from 'lucide-react'
+import { ExternalLink, Github, Twitter, Instagram, Linkedin, Globe, Mail, CheckCircle2, Send, Loader2 } from 'lucide-react'
 import GeckoLogo from '@/app/components/GeckoLogo'
 import { motion, AnimatePresence } from 'framer-motion'
 import { getYouTubeId, getSpotifyId } from '@/lib/utils'
+import { useState } from 'react'
+import { supabase } from '@/lib/supabaseClient'
 
 export default function BioTemplate({ profile, links }) {
     if (!profile) return null
+
+    const [email, setEmail] = useState('')
+    const [subscribing, setSubscribing] = useState(false)
+    const [subscribeMessage, setSubscribeMessage] = useState('')
+    const [isSuccess, setIsSuccess] = useState(false)
+
+    const handleSubscribe = async (e) => {
+        e.preventDefault()
+        if (!email) return
+
+        setSubscribing(true)
+        setSubscribeMessage('')
+
+        const { error } = await supabase.from('subscribers').insert([
+            { profile_id: profile.id, email }
+        ])
+
+        if (error) {
+            // Handle duplicate email error gracefully
+            if (error.code === '23505') {
+                setSubscribeMessage("You are already subscribed!")
+                setIsSuccess(true)
+            } else {
+                setSubscribeMessage("An error occurred. Please try again.")
+                setIsSuccess(false)
+            }
+        } else {
+            setSubscribeMessage("Successfully subscribed!")
+            setIsSuccess(true)
+            setEmail('')
+        }
+        setSubscribing(false)
+    }
 
     // Theme configuration
     const themes = {
@@ -156,7 +191,7 @@ export default function BioTemplate({ profile, links }) {
                             href={link.original_url}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className={`block w-full backdrop-blur-md border ${currentTheme.button} ${buttonStyle} p-4 text-center transition-all duration-300 transform hover:-translate-y-1 hover:shadow-xl group relative overflow-hidden`}
+                            className={`block w-full backdrop-blur-md border ${currentTheme.button} ${buttonStyle} p-4 text-center transition-all duration-300 transform hover:-translate-y-1 group relative overflow-hidden ${link.is_priority ? 'ring-2 ring-blue-400/50 shadow-[0_0_20px_rgba(96,165,250,0.4)] animate-[pulse_3s_ease-in-out_infinite]' : 'hover:shadow-xl'}`}
                         >
                             <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/10 to-white/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700 pointer-events-none" />
 
@@ -206,6 +241,48 @@ export default function BioTemplate({ profile, links }) {
                     </div>
                 )}
             </div>
+
+            {/* Newsletter Section */}
+            {profile.enable_newsletter && (
+                <motion.div 
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.5 }}
+                    className="w-full max-w-md mt-8 relative z-10"
+                >
+                    <div className={`p-6 rounded-2xl backdrop-blur-md border ${currentTheme.button} ${buttonStyle} text-center space-y-4`}>
+                        <h3 className={`font-semibold text-lg ${currentTheme.text}`}>
+                            {profile.newsletter_text || 'Subscribe to my newsletter'}
+                        </h3>
+                        <form onSubmit={handleSubscribe} className="flex flex-col gap-3">
+                            <div className="relative">
+                                <input
+                                    type="email"
+                                    required
+                                    placeholder="Enter your email address"
+                                    value={email}
+                                    onChange={(e) => setEmail(e.target.value)}
+                                    className={`w-full pl-10 pr-4 py-3 rounded-xl bg-black/10 border border-white/20 focus:border-white/50 focus:ring-2 focus:ring-white/20 outline-none transition-all placeholder:text-white/50 ${currentTheme.text}`}
+                                />
+                                <Mail className="absolute left-3 top-3.5 opacity-50" size={18} />
+                            </div>
+                            <button
+                                type="submit"
+                                disabled={subscribing}
+                                className={`w-full py-3 rounded-xl flex items-center justify-center gap-2 font-bold transition-all disabled:opacity-50 ${profile.theme_color === 'light' || profile.theme_color === 'lilac' ? 'bg-slate-900 text-white hover:bg-slate-800' : 'bg-white text-slate-900 hover:bg-slate-100'}`}
+                            >
+                                {subscribing ? <Loader2 size={18} className="animate-spin" /> : <Send size={18} />}
+                                Subscribe
+                            </button>
+                        </form>
+                        {subscribeMessage && (
+                            <p className={`text-sm ${isSuccess ? 'text-green-400' : 'text-red-400'}`}>
+                                {subscribeMessage}
+                            </p>
+                        )}
+                    </div>
+                </motion.div>
+            )}
 
             <footer className={`mt-16 text-[10px] flex flex-col items-center gap-2 ${profile.theme_color === 'light' ? 'text-slate-400' : 'text-slate-600'} uppercase tracking-[0.2em] font-bold opacity-60`}>
                 <GeckoLogo className="w-8 h-8 mb-4 opacity-50 hover:opacity-100 transition-opacity" />

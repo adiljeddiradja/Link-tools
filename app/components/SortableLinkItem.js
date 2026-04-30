@@ -3,9 +3,9 @@
 import React from 'react'
 import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
-import { GripVertical, Trash2 } from 'lucide-react'
+import { GripVertical, Trash2, Star } from 'lucide-react'
 
-export function SortableLinkItem({ link, onToggleActive, onToggleHidden, onDelete }) {
+export function SortableLinkItem({ link, onToggleActive, onToggleHidden, onTogglePriority, onDelete }) {
     const {
         attributes,
         listeners,
@@ -53,6 +53,21 @@ export function SortableLinkItem({ link, onToggleActive, onToggleHidden, onDelet
                         />
                     </button>
                     <span className="text-[8px] text-muted-foreground uppercase font-bold tracking-tighter">Status</span>
+                </div>
+
+                <div className="flex flex-col items-center gap-1">
+                    <button
+                        onClick={() => onTogglePriority && onTogglePriority(link.id, link.is_priority)}
+                        className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors focus:outline-none ${link.is_priority ? 'bg-yellow-500' : 'bg-slate-700'}`}
+                        title={link.is_priority ? 'Priority Active' : 'Set as Priority'}
+                    >
+                        <span
+                            className={`${link.is_priority ? 'translate-x-5' : 'translate-x-1'} inline-block h-3 w-3 transform rounded-full bg-white transition-transform flex items-center justify-center`}
+                        >
+                             {link.is_priority && <Star size={8} className="text-yellow-500 fill-yellow-500" />}
+                        </span>
+                    </button>
+                    <span className="text-[8px] text-muted-foreground uppercase font-bold tracking-tighter">Priority</span>
                 </div>
 
                 <div className="flex flex-col items-center gap-1">
